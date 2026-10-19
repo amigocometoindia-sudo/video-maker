@@ -8,6 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from pydantic import BaseModel
 from uuid import uuid4
+import io
+from PIL import Image
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -112,8 +114,51 @@ def _safe_video_stem(filename: str) -> str:
     return safe_stem or "generated_video"
 
 
-def _run_generation(job_id, image_paths, cues, work_dir, output_path, cancel_event, audio_path, apply_zoom, sfx_paths, aspect_ratio, intensity_sfx_paths=None, popup_paths=None, popup_sfx_paths=None, api_key=None, ai_provider=None, popup_prompt=None, api_model=None, motion_style="smart_random", zoom_intensity="subtle", bg_mode="crop_fill", enable_subtitles=False, subtitle_style="hormozi_yellow", subtitle_position="bottom", subtitle_font_size=46, gpu_accel="auto", parallel_workers=4, initial_popup_mapping=None, emotion_sfx_volume=0.15, color_saturation=1.14, popup_sfx_volume=0.40):
+def _run_generation(
+    job_id,
+    image_paths,
+    cues,
+    work_dir,
+    output_path,
+    cancel_event,
+    audio_path,
+    apply_zoom,
+    sfx_paths,
+    aspect_ratio,
+    intensity_sfx_paths=None,
+    popup_paths=None,
+    popup_sfx_paths=None,
+    api_key=None,
+    ai_provider=None,
+    popup_prompt=None,
+    api_model=None,
+    motion_style="smart_random",
+    zoom_intensity="subtle",
+    bg_mode="crop_fill",
+    enable_subtitles=False,
+    subtitle_style="hormozi_yellow",
+    subtitle_position="bottom",
+    subtitle_font_size=46,
+    gpu_accel="auto",
+    parallel_workers=4,
+    initial_popup_mapping=None,
+    emotion_sfx_volume=0.15,
+    color_saturation=1.14,
+    popup_sfx_volume=0.25,
+    transition_sfx_density=25.0,
+    transition_sfx_volume=0.15,
+    emotion_sfx_density=25.0,
+    popup_sfx_density=30.0,
+):
     total_images = len(cues)
+
+    # Normalize densities and volumes (support both 0-100 and 0.0-1.0)
+    t_density = transition_sfx_density / 100.0 if transition_sfx_density > 1.0 else transition_sfx_density
+    t_vol = transition_sfx_volume / 100.0 if transition_sfx_volume > 1.0 else transition_sfx_volume
+    e_density = emotion_sfx_density / 100.0 if emotion_sfx_density > 1.0 else emotion_sfx_density
+    e_vol = emotion_sfx_volume / 100.0 if emotion_sfx_volume > 1.0 else emotion_sfx_volume
+    p_density = popup_sfx_density / 100.0 if popup_sfx_density > 1.0 else popup_sfx_density
+    p_vol = popup_sfx_volume / 100.0 if popup_sfx_volume > 1.0 else popup_sfx_volume
 
     def image_started(index, filename):
         _update_job(
@@ -135,9 +180,9 @@ def _run_generation(job_id, image_paths, cues, work_dir, output_path, cancel_eve
             def intensity_progress(current_chunk, total_chunks):
                 prog = 5 + int((current_chunk / total_chunks) * 4)
                 stage_changed(f"Analyzing dialogue sound effects - Chunk {current_chunk+1}/{total_chunks}...", prog)
-            intensity_mapping = analyze_cues_intensity(cues, list(intensity_sfx_paths.keys()), api_key, ai_provider, api_model, progress_callback=intensity_progress)
+            intensity_mapping = analyze_cues_intensity(cues, list(intensity_sfx_paths.keys()), api_key, ai_provider, api_model, progress_callback=intensity_progress, sfx_density=e_density)
             active_sfx = [v for v in intensity_mapping.values() if v and v.lower() != 'none']
-            print(f"[SFX] Mapped {len(active_sfx)} sound triggers across {len(cues)} cues: {active_sfx}", flush=True)
+            print(f"[SFX] Mapped {len(active_sfx)} sound triggers across {len(cues)} cues (density={e_density:.2f}): {active_sfx}", flush=True)
             
         if initial_popup_mapping:
             popup_mapping = dict(initial_popup_mapping)
@@ -181,8 +226,11 @@ def _run_generation(job_id, image_paths, cues, work_dir, output_path, cancel_eve
             subtitle_font_size=subtitle_font_size,
             gpu_accel=gpu_accel,
             parallel_workers=parallel_workers,
-            emotion_sfx_volume=emotion_sfx_volume,
-            popup_sfx_volume=popup_sfx_volume,
+            transition_sfx_density=t_density,
+            transition_sfx_volume=t_vol,
+            emotion_sfx_volume=e_vol,
+            popup_sfx_density=p_density,
+            popup_sfx_volume=p_vol,
             color_saturation=color_saturation,
         )
         _update_job(
@@ -254,8 +302,12 @@ async def generate_video(
     gpu_accel: str = Form(default="auto"),
     parallel_workers: int = Form(default=4),
     emotion_sfx_volume: float = Form(default=0.15),
-    popup_sfx_volume: float = Form(default=0.40),
+    popup_sfx_volume: float = Form(default=0.25),
     color_boost: float = Form(default=115),
+    transition_sfx_density: float = Form(default=25.0),
+    transition_sfx_volume: float = Form(default=0.15),
+    emotion_sfx_density: float = Form(default=25.0),
+    popup_sfx_density: float = Form(default=30.0),
 ):
     if not srt_file.filename or not srt_file.filename.lower().endswith(".srt"):
         raise HTTPException(status_code=400, detail="Please select an SRT file.")
@@ -278,8 +330,19 @@ async def generate_video(
 
     image_paths = []
     for index, image in enumerate(valid_images):
-        image_path = work_dir / f"image_{index:05d}{Path(image.filename).suffix.lower()}"
-        image_path.write_bytes(await image.read())
+        raw_data = await image.read()
+        image_path = work_dir / f"image_{index:05d}.jpg"
+        try:
+            with Image.open(io.BytesIO(raw_data)) as im:
+                im = im.convert("RGB")
+                w, h = im.size
+                im_cropped = im.crop((int(w * 0.01), int(h * 0.01), int(w * 0.96), int(h * 0.96)))
+                im_cropped.save(image_path, "JPEG", quality=96)
+        except Exception as e:
+            print(f"[Image Crop] Warning: Could not crop image {index} with PIL ({e}), writing raw bytes", flush=True)
+            fallback_path = work_dir / f"image_{index:05d}{Path(image.filename).suffix.lower()}"
+            fallback_path.write_bytes(raw_data)
+            image_path = fallback_path
         image_paths.append(image_path)
 
     audio_path = None
@@ -436,26 +499,30 @@ async def generate_video(
         apply_zoom,
         sfx_paths,
         aspect_ratio,
-        intensity_sfx_paths,
-        popup_paths,
-        popup_sfx_paths,
-        api_key,
-        ai_provider,
-        popup_prompt,
-        api_model,
-        motion_style,
-        zoom_intensity,
-        bg_mode,
-        enable_subtitles,
-        subtitle_style,
-        subtitle_position,
-        subtitle_font_size,
-        gpu_accel,
-        parallel_workers,
-        None,
-        emotion_sfx_volume,
-        max(0.2, min(float(color_boost) / 100.0, 2.5)),
-        popup_sfx_volume,
+        intensity_sfx_paths=intensity_sfx_paths,
+        popup_paths=popup_paths,
+        popup_sfx_paths=popup_sfx_paths,
+        api_key=api_key,
+        ai_provider=ai_provider,
+        popup_prompt=popup_prompt,
+        api_model=api_model,
+        motion_style=motion_style,
+        zoom_intensity=zoom_intensity,
+        bg_mode=bg_mode,
+        enable_subtitles=enable_subtitles,
+        subtitle_style=subtitle_style,
+        subtitle_position=subtitle_position,
+        subtitle_font_size=subtitle_font_size,
+        gpu_accel=gpu_accel,
+        parallel_workers=parallel_workers,
+        initial_popup_mapping=None,
+        emotion_sfx_volume=emotion_sfx_volume,
+        color_saturation=max(0.2, min(float(color_boost) / 100.0, 2.5)),
+        popup_sfx_volume=popup_sfx_volume,
+        transition_sfx_density=transition_sfx_density,
+        transition_sfx_volume=transition_sfx_volume,
+        emotion_sfx_density=emotion_sfx_density,
+        popup_sfx_density=popup_sfx_density,
     )
 
     return {"job_id": job_id}

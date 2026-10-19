@@ -203,8 +203,11 @@ def create_video(
     subtitle_font_size: int = 46,
     gpu_accel: str = "auto",
     parallel_workers: int = 4,
+    transition_sfx_density: float = 0.25,
+    transition_sfx_volume: float = 0.15,
     emotion_sfx_volume: float = 0.15,
-    popup_sfx_volume: float = 0.40,
+    popup_sfx_density: float = 0.30,
+    popup_sfx_volume: float = 0.25,
     color_saturation: float = 1.14,
 ) -> None:
     if len(images) < len(cues):
@@ -274,13 +277,14 @@ def create_video(
 
         # 3. Camera Motion & Screen Impact Shake with Contrast Adaptive Sharpening (CAS) & Cinematic Color
         if apply_zoom and motion_style != "static":
-            zoom_frame_count = max(
-                min(frame_count, round(MAX_ZOOM_DURATION_SECONDS * VIDEO_FPS)),
-                3,
-            )
-            zoom_span = max(zoom_frame_count - 1, 1)
+            total_frames = max(int(round(duration * VIDEO_FPS)), 1)
+            zoom_span = max(total_frames - 1, 1)
             zoom_frame = f"min(on\\,{zoom_span})"
             eased_progress = f"(1-cos(PI*{zoom_frame}/{zoom_span}))/2"
+
+            base_zoom = 1.05
+            target_zoom = 1.11
+            zoom_diff = target_zoom - base_zoom
 
             chosen_motion = motion_style
             if motion_style == "smart_random":
@@ -289,19 +293,19 @@ def create_video(
 
             shake_suffix = f" {cam_shake}".strip() if cam_shake else ""
             if chosen_motion == "zoom_in":
-                zoom_expression = f"1+{max_zoom_val - 1:.4f}*{eased_progress}"
+                zoom_expression = f"{base_zoom:.4f}+{zoom_diff:.4f}*{eased_progress}"
                 pan_x = f"iw/2-(iw/zoom/2) {shake_suffix}".strip()
                 pan_y = f"ih/2-(ih/zoom/2) {shake_suffix}".strip()
             elif chosen_motion == "zoom_out":
-                zoom_expression = f"{max_zoom_val:.4f}-{max_zoom_val - 1:.4f}*{eased_progress}"
+                zoom_expression = f"{target_zoom:.4f}-{zoom_diff:.4f}*{eased_progress}"
                 pan_x = f"iw/2-(iw/zoom/2) {shake_suffix}".strip()
                 pan_y = f"ih/2-(ih/zoom/2) {shake_suffix}".strip()
             elif chosen_motion == "pan_left":
-                zoom_expression = f"{max_zoom_val:.4f}"
+                zoom_expression = f"{target_zoom:.4f}"
                 pan_x = f"(iw-iw/zoom)*(1-{eased_progress}) {shake_suffix}".strip()
                 pan_y = f"ih/2-(ih/zoom/2) {shake_suffix}".strip()
             else:
-                zoom_expression = f"{max_zoom_val:.4f}"
+                zoom_expression = f"{target_zoom:.4f}"
                 pan_x = f"(iw-iw/zoom)*{eased_progress} {shake_suffix}".strip()
                 pan_y = f"ih/2-(ih/zoom/2) {shake_suffix}".strip()
 
@@ -457,20 +461,27 @@ def create_video(
         encoding="utf-8",
     )
     sfx_audio_path = None
-    if sfx_paths:
+    t_density = transition_sfx_density / 100.0 if transition_sfx_density > 1.0 else transition_sfx_density
+    t_volume = transition_sfx_volume / 100.0 if transition_sfx_volume > 1.0 else transition_sfx_volume
+    if sfx_paths and t_density > 0.01 and t_volume > 0.005:
         if on_stage_changed:
             on_stage_changed("Preparing image-change sounds...", 89)
         sfx_audio_path = work_dir / "image_change_sfx.wav"
-        _create_sfx_track(
+        has_sfx = _create_sfx_track(
             ffmpeg_path,
             sfx_paths,
             cues,
             sfx_audio_path,
             cancel_event,
+            transition_sfx_density=t_density,
+            transition_sfx_volume=t_volume,
         )
+        if not has_sfx:
+            sfx_audio_path = None
 
     intensity_audio_path = None
-    if intensity_sfx_paths and intensity_mapping:
+    e_volume = emotion_sfx_volume / 100.0 if emotion_sfx_volume > 1.0 else emotion_sfx_volume
+    if intensity_sfx_paths and intensity_mapping and e_volume > 0.005:
         if on_stage_changed:
             on_stage_changed("Preparing dialogue intensity sounds...", 88)
         intensity_audio_path = work_dir / "intensity_sfx.wav"
@@ -481,12 +492,15 @@ def create_video(
             cues,
             intensity_audio_path,
             cancel_event,
+            emotion_sfx_volume=e_volume,
         )
         if not has_intensity:
             intensity_audio_path = None
 
     popup_audio_path = None
-    if popup_sfx_paths and popup_mapping and popup_sfx_volume > 0.001:
+    p_density = popup_sfx_density / 100.0 if popup_sfx_density > 1.0 else popup_sfx_density
+    p_volume = popup_sfx_volume / 100.0 if popup_sfx_volume > 1.0 else popup_sfx_volume
+    if popup_sfx_paths and popup_mapping and p_density > 0.01 and p_volume > 0.005:
         if on_stage_changed:
             on_stage_changed("Preparing popup sounds...", 89)
         popup_audio_path = work_dir / "popup_sfx.wav"
@@ -497,6 +511,8 @@ def create_video(
             cues,
             popup_audio_path,
             cancel_event,
+            popup_sfx_density=p_density,
+            popup_sfx_volume=p_volume,
         )
         if not has_popups:
             popup_audio_path = None
@@ -543,19 +559,14 @@ def create_video(
             filter_str = ""
             mix_inputs = []
             for i, (a_label, a_type) in enumerate(audio_inputs):
-                # Clean, balanced track volumes:
-                # Voice = 1.0 (clear speech)
-                # Transition clicks = 0.18 (soft, subtle camera shutter click)
-                # Emotion / Dialogue SFX = emotion_sfx_volume (quiet, non-intrusive background accents)
-                # Popups = popup_sfx_volume
                 vol = 1.0
                 if a_type == "transition":
-                    vol = 0.18
+                    vol = max(0.0, float(t_volume))
                 elif a_type == "intensity":
-                    vol = max(0.0, float(emotion_sfx_volume))
+                    vol = max(0.0, float(e_volume))
                 elif a_type == "popup":
-                    vol = max(0.0, float(popup_sfx_volume))
-                filter_str += f"[{a_label}]aresample=48000,volume={vol}[a{i}];"
+                    vol = max(0.0, float(p_volume))
+                filter_str += f"[{a_label}]aresample=48000,volume={vol:.3f}[a{i}];"
                 mix_inputs.append(f"[a{i}]")
                 
             filter_str += f"{''.join(mix_inputs)}amix=inputs={len(audio_inputs)}:duration=first:dropout_transition=0:normalize=0[aout]"
@@ -568,14 +579,14 @@ def create_video(
             a_label, a_type = audio_inputs[0]
             vol = 1.0
             if a_type == "transition":
-                vol = 0.18
+                vol = max(0.0, float(t_volume))
             elif a_type == "intensity":
-                vol = max(0.0, float(emotion_sfx_volume))
+                vol = max(0.0, float(e_volume))
             elif a_type == "popup":
-                vol = max(0.0, float(popup_sfx_volume))
+                vol = max(0.0, float(p_volume))
             if vol != 1.0:
                 mux_command.extend([
-                    "-filter_complex", f"[{a_label}]aresample=48000,volume={vol}[aout]",
+                    "-filter_complex", f"[{a_label}]aresample=48000,volume={vol:.3f}[aout]",
                     "-map", "0:v:0",
                     "-map", "[aout]",
                 ])
@@ -598,20 +609,33 @@ def _create_sfx_track(
     cues: list[Cue],
     output_path: Path,
     cancel_event: threading.Event | None = None,
-) -> None:
+    transition_sfx_density: float = 0.25,
+    transition_sfx_volume: float = 0.15,
+) -> bool:
+    density = transition_sfx_density / 100.0 if transition_sfx_density > 1.0 else transition_sfx_density
+    volume = transition_sfx_volume / 100.0 if transition_sfx_volume > 1.0 else transition_sfx_volume
+    if density <= 0.01 or volume <= 0.005 or not sfx_paths or not cues:
+        return False
+
     import random
 
     total_duration = sum(_duration_seconds(cues, index) for index in range(len(cues)))
     elapsed_ms = 0
     cue_sfx_mapping = []
 
+    step = max(1, round(1.0 / max(density, 0.01)))
+    last_sfx_index = None
+
     for index, cue in enumerate(cues):
-        sfx_index = random.choice(range(len(sfx_paths)))
-        cue_sfx_mapping.append((sfx_index, elapsed_ms))
+        if index % step == 0:
+            candidates = [i for i in range(len(sfx_paths)) if i != last_sfx_index] if (len(sfx_paths) > 1 and last_sfx_index is not None) else list(range(len(sfx_paths)))
+            sfx_index = random.choice(candidates)
+            last_sfx_index = sfx_index
+            cue_sfx_mapping.append((sfx_index, elapsed_ms))
         elapsed_ms += round(_duration_seconds(cues, index) * 1_000)
 
     if not cue_sfx_mapping:
-        return
+        return False
 
     BATCH_SIZE = 150
     batches = [cue_sfx_mapping[i:i+BATCH_SIZE] for i in range(0, len(cue_sfx_mapping), BATCH_SIZE)]
@@ -650,7 +674,7 @@ def _create_sfx_track(
             filter_parts.append(f"{in_label}adelay={delay}|{delay}{out_label};")
             
         filter_parts.append(
-            f"{''.join(delayed_labels)}amix=inputs={len(delayed_labels)}:duration=longest:dropout_transition=0:normalize=0,volume=0.18[aout]"
+            f"{''.join(delayed_labels)}amix=inputs={len(delayed_labels)}:duration=longest:dropout_transition=0:normalize=0,volume={volume:.3f}[aout]"
         )
         
         batch_out = output_path.with_name(f"temp_sfx_{b_idx}.wav")
@@ -685,6 +709,7 @@ def _create_sfx_track(
         for bf in batch_files:
             try: bf.unlink()
             except: pass
+    return True
 
 def _create_intensity_track(
     ffmpeg_path: Path,
@@ -693,7 +718,12 @@ def _create_intensity_track(
     cues: list[Cue],
     output_path: Path,
     cancel_event: threading.Event | None = None,
+    emotion_sfx_volume: float = 0.15,
 ) -> bool:
+    vol = emotion_sfx_volume / 100.0 if emotion_sfx_volume > 1.0 else emotion_sfx_volume
+    if vol <= 0.005 or not intensity_sfx_paths or not intensity_mapping:
+        return False
+
     total_duration = sum(_duration_seconds(cues, index) for index in range(len(cues)))
     elapsed_ms = 0
     cue_audio_mapping = []
@@ -769,7 +799,7 @@ def _create_intensity_track(
             filter_parts.append(f"{in_label}adelay={delay}|{delay}{out_label};")
             
         filter_parts.append(
-            f"{''.join(delayed_labels)}amix=inputs={len(delayed_labels)}:duration=longest:dropout_transition=0:normalize=0,volume=0.30[aout]"
+            f"{''.join(delayed_labels)}amix=inputs={len(delayed_labels)}:duration=longest:dropout_transition=0:normalize=0,volume={vol:.3f}[aout]"
         )
         
         batch_out = output_path.with_name(f"temp_int_{b_idx}.wav")
@@ -849,19 +879,33 @@ def _create_popup_track(
     cues: list[Cue],
     output_path: Path,
     cancel_event: threading.Event | None = None,
+    popup_sfx_density: float = 0.30,
+    popup_sfx_volume: float = 0.25,
 ) -> bool:
+    density = popup_sfx_density / 100.0 if popup_sfx_density > 1.0 else popup_sfx_density
+    volume = popup_sfx_volume / 100.0 if popup_sfx_volume > 1.0 else popup_sfx_volume
+    if density <= 0.01 or volume <= 0.005 or not popup_sfx_paths or not popup_mapping or not cues:
+        return False
+
     total_duration = sum(_duration_seconds(cues, index) for index in range(len(cues)))
     elapsed_ms = 0
     cue_audio_mapping = []
     
     import random
     unique_paths = popup_sfx_paths
+    step = max(1, round(1.0 / max(density, 0.01)))
+    popup_count = 0
+    last_popup_idx = None
     
     for index, cue in enumerate(cues):
         label = popup_mapping.get(index)
         if label and label != "none" and unique_paths:
-            idx = random.choice(range(len(unique_paths)))
-            cue_audio_mapping.append((idx, elapsed_ms))
+            if popup_count % step == 0:
+                candidates = [i for i in range(len(unique_paths)) if i != last_popup_idx] if (len(unique_paths) > 1 and last_popup_idx is not None) else list(range(len(unique_paths)))
+                idx = random.choice(candidates)
+                last_popup_idx = idx
+                cue_audio_mapping.append((idx, elapsed_ms))
+            popup_count += 1
             
         elapsed_ms += round(_duration_seconds(cues, index) * 1_000)
 
@@ -904,7 +948,7 @@ def _create_popup_track(
             filter_parts.append(f"{in_label}adelay={delay}|{delay}{out_label};")
             
         filter_parts.append(
-            f"{''.join(delayed_labels)}amix=inputs={len(delayed_labels)}:duration=longest:dropout_transition=0:normalize=0,volume=0.85[aout]"
+            f"{''.join(delayed_labels)}amix=inputs={len(delayed_labels)}:duration=longest:dropout_transition=0:normalize=0,volume={volume:.3f}[aout]"
         )
         
         batch_out = output_path.with_name(f"temp_pop_{b_idx}.wav")

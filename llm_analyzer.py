@@ -589,22 +589,36 @@ EMOTION_AND_SFX_RULES = [
     },
 ]
 
-def heuristic_intensity_mapping(cues, intensity_labels: list[str]) -> dict[int, str]:
+def heuristic_intensity_mapping(cues, intensity_labels: list[str], sfx_density: float = 0.25) -> dict[int, str]:
     """Smart heuristic dialogue audio matcher for emotion, reaction, and intensity sound effects."""
     if not intensity_labels or not cues:
         return {}
 
+    density = sfx_density / 100.0 if sfx_density > 1.0 else sfx_density
+    if density <= 0.01:
+        return {}
+
+    min_cue_gap = max(1, int(round(1.0 / max(density, 0.05))))
     mapping = {}
     lower_sfx = {lbl.lower(): lbl for lbl in intensity_labels}
-    last_sfx_idx = -999
+    last_sfx_idx = -9999
+    recent_sounds = []
 
-    def find_sound_by_keys(keys: list[str]):
+    def find_sound_by_keys(keys: list[str], avoid: list[str] = None):
+        candidates = []
         for k in keys:
             k_lower = k.lower()
             for sfx_key, original in lower_sfx.items():
                 if k_lower in sfx_key or sfx_key in k_lower:
-                    return original
-        return None
+                    if original not in candidates:
+                        candidates.append(original)
+        if not candidates:
+            return None
+        if avoid:
+            filtered = [c for c in candidates if c not in avoid]
+            if filtered:
+                return filtered[0]
+        return candidates[0]
 
     # Pre-resolve sound files for each rule from the available pool
     rule_sound_map = []
@@ -613,51 +627,70 @@ def heuristic_intensity_mapping(cues, intensity_labels: list[str]) -> dict[int, 
         if not sound and "fallback_sound_keys" in rule:
             sound = find_sound_by_keys(rule["fallback_sound_keys"])
         if sound:
-            rule_sound_map.append((rule["words"], sound))
+            rule_sound_map.append((rule["words"], rule["sound_keys"], rule.get("fallback_sound_keys", [])))
 
     for idx, cue in enumerate(cues):
-        if idx - last_sfx_idx < 2:
+        if idx - last_sfx_idx < min_cue_gap:
             continue
 
         cue_text = (cue.text or "").lower()
         matched = None
 
-        # 1. Match semantic emotion and sound effect rules
-        for words, sound in rule_sound_map:
+        # 1. Match semantic emotion and sound effect rules avoiding recent_sounds
+        for words, sound_keys, fallback_keys in rule_sound_map:
             if any(re.search(r'\b' + re.escape(w) + r'\b', cue_text) for w in words):
-                matched = sound
-                break
+                sound = find_sound_by_keys(sound_keys, avoid=recent_sounds)
+                if not sound and fallback_keys:
+                    sound = find_sound_by_keys(fallback_keys, avoid=recent_sounds)
+                # If all matched are in recent_sounds, fall back to any available match
+                if not sound:
+                    sound = find_sound_by_keys(sound_keys) or (find_sound_by_keys(fallback_keys) if fallback_keys else None)
+                if sound:
+                    matched = sound
+                    break
 
         # 2. Dynamic direct word match with custom audio filenames
         if not matched:
+            custom_matches = []
             for sfx_key, original in lower_sfx.items():
                 clean_stem = re.sub(r'[^a-zA-Z0-9]', ' ', sfx_key).strip()
                 tokens = [t for t in clean_stem.split() if len(t) > 3 and t not in ("sound", "audio", "effect")]
                 if any(re.search(r'\b' + re.escape(tok) + r'\b', cue_text) for tok in tokens):
-                    matched = original
-                    break
+                    custom_matches.append(original)
+            if custom_matches:
+                non_recent = [m for m in custom_matches if m not in recent_sounds]
+                matched = non_recent[0] if non_recent else custom_matches[0]
 
         if matched:
             mapping[idx] = matched
             last_sfx_idx = idx
+            recent_sounds.append(matched)
+            if len(recent_sounds) > 3:
+                recent_sounds.pop(0)
 
-    print(f"[HD SFX Director] Professionally mapped {len(mapping)} sound triggers across {len(cues)} cues: {list(mapping.values())}", flush=True)
+    print(f"[HD SFX Director] Professionally mapped {len(mapping)} sound triggers across {len(cues)} cues (density={density:.2f}, min_gap={min_cue_gap}): {list(mapping.values())[:8]}...", flush=True)
     return mapping
 
 
-def analyze_cues_intensity(cues, intensity_labels: list[str], api_key: str = "", provider: str = "openai", api_model: str = None, progress_callback=None) -> dict[int, str]:
+def analyze_cues_intensity(cues, intensity_labels: list[str], api_key: str = "", provider: str = "openai", api_model: str = None, progress_callback=None, sfx_density: float = 0.25) -> dict[int, str]:
     if not intensity_labels or not cues:
         return {}
 
+    density = sfx_density / 100.0 if sfx_density > 1.0 else sfx_density
+    if density <= 0.01:
+        return {}
+
+    min_cue_gap = max(1, int(round(1.0 / max(density, 0.05))))
+
     if not api_key:
-        return heuristic_intensity_mapping(cues, intensity_labels)
+        return heuristic_intensity_mapping(cues, intensity_labels, sfx_density=density)
 
     mapping = {}
     chunk_size = 50
     sample_1 = intensity_labels[0]
     sample_2 = intensity_labels[1] if len(intensity_labels) > 1 else intensity_labels[0]
     labels_formatted = ", ".join(f'"{lbl}"' for lbl in intensity_labels)
-    extra_cache_key = ",".join(sorted(intensity_labels))
+    extra_cache_key = f"{','.join(sorted(intensity_labels))}_d{int(density*100)}"
 
     for start_idx in range(0, len(cues), chunk_size):
         chunk_cues = cues[start_idx:start_idx+chunk_size]
@@ -672,10 +705,10 @@ def analyze_cues_intensity(cues, intensity_labels: list[str], api_key: str = "",
             "   (a) An expressive emotion or audio effect category: angry, sad, crying, happy, laugh, funny, shock, surprise, wow, fear, scared, confused, awkward, lazy, guilt, fail, wrong, worry, idea, punch, hit, impact, boom, explosion, whoosh, ding, bell, money, victory, tension, clock, phone, camera.\n"
             "   (b) OR any exact sound filename from the available sound effects pool above.\n"
             "2. Match the emotional feeling, tone, or implied action of each line with the best fitting sound effect or emotion.\n"
-            "3. Pacing: Assign an appropriate sound to about 1 out of every 2 or 3 lines to maintain a high-energy, engaging, and emotionally dynamic video. Do NOT leave too many lines as 'none'.\n"
+            f"3. Pacing: Assign an appropriate sound to about 1 sound every {min_cue_gap} lines (~{int(density * 100)}% of lines) to maintain engaging, emotionally dynamic audio. Do NOT spam sounds or leave too many gaps.\n"
             "4. If no sound fits the line or for quiet speech, assign \"none\". Do NOT assign sounds to consecutive lines back-to-back.\n\n"
             "Respond ONLY with a valid JSON object mapping the subtitle index (as a string) to the chosen emotion or sound effect name.\n"
-            f'Example: {{"{start_idx}": "shock", "{start_idx + 2}": "none", "{start_idx + 4}": "{sample_2}"}}\n\n'
+            f'Example: {{"{start_idx}": "shock", "{start_idx + min_cue_gap}": "{sample_2}"}}\n\n'
             "Subtitles:\n"
         )
         for j, cue in enumerate(chunk_cues):
@@ -727,21 +760,29 @@ def analyze_cues_intensity(cues, intensity_labels: list[str], api_key: str = "",
                 print(f"[Intensity AI Attempt {attempt+1}] {e}", flush=True)
                 time.sleep(2)
 
-        # Ensure the chunk has rich audio coverage: if AI returned very few sounds (< 2 for 50 cues),
-        # fill in missing emotional/dramatic moments using smart heuristic matching!
-        chunk_mapped = {k: v for k, v in mapping.items() if start_idx <= k < start_idx + len(chunk_cues)}
-        if len(chunk_mapped) < max(2, len(chunk_cues) // 10):
-            h_map = heuristic_intensity_mapping(chunk_cues, intensity_labels)
-            for h_offset, h_sound in h_map.items():
-                abs_idx = start_idx + h_offset
-                if abs_idx not in mapping and (abs_idx - 1) not in mapping and (abs_idx + 1) not in mapping:
-                    mapping[abs_idx] = h_sound
+    # Filter out any cues that violate min_cue_gap or repeat the same sound back-to-back
+    filtered_mapping = {}
+    last_idx = -9999
+    last_sound = None
+    for k in sorted(mapping.keys()):
+        snd = mapping[k]
+        if k - last_idx >= min_cue_gap and snd != last_sound:
+            filtered_mapping[k] = snd
+            last_idx = k
+            last_sound = snd
+    mapping = filtered_mapping
 
-    # Final pass: fill any remaining dialogue moments so no long scenes are devoid of emotional audio
-    h_all = heuristic_intensity_mapping(cues, intensity_labels)
-    for idx, snd in h_all.items():
-        if idx not in mapping and (idx - 1) not in mapping and (idx + 1) not in mapping:
-            mapping[idx] = snd
+    # Only run the fallback fill pass if the total mapped sounds are below int(len(cues) * density * 0.6)
+    min_required_sounds = int(len(cues) * density * 0.6)
+    if len(mapping) < min_required_sounds:
+        h_all = heuristic_intensity_mapping(cues, intensity_labels, sfx_density=density)
+        for idx, snd in h_all.items():
+            if idx not in mapping:
+                too_close = any(abs(idx - ex_idx) < min_cue_gap for ex_idx in mapping.keys())
+                prev_sfx = mapping.get(idx - min_cue_gap)
+                next_sfx = mapping.get(idx + min_cue_gap)
+                if not too_close and snd != prev_sfx and snd != next_sfx:
+                    mapping[idx] = snd
 
     return mapping
 

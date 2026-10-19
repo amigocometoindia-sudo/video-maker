@@ -6,37 +6,104 @@ const applyZoom = document.querySelector('#apply-zoom');
 const bundledSfxContainer = document.querySelector('#bundled-sfx-container');
 const customSfx = document.querySelector('#custom-sfx');
 const customIntensity = document.querySelector('#custom-intensity');
+const transitionSfxDensity = document.querySelector('#transition_sfx_density');
+const transitionSfxDensityLabel = document.querySelector('#transition-sfx-density-label');
+const transitionSfxVolume = document.querySelector('#transition_sfx_volume');
+const transitionSfxVolLabel = document.querySelector('#transition-sfx-vol-label');
+
+const emotionSfxDensity = document.querySelector('#emotion_sfx_density');
+const emotionSfxDensityLabel = document.querySelector('#emotion-sfx-density-label');
 const emotionSfxVolume = document.querySelector('#emotion-sfx-volume');
 const emotionSfxVolLabel = document.querySelector('#emotion-sfx-vol-label');
-if (emotionSfxVolume && emotionSfxVolLabel) {
-  emotionSfxVolume.addEventListener('input', () => {
-    const val = parseFloat(emotionSfxVolume.value);
-    const pct = Math.round(val * 100);
-    let desc = 'Quiet & Subtle';
-    if (pct === 0) desc = 'Muted';
-    else if (pct <= 10) desc = 'Very Quiet';
-    else if (pct <= 20) desc = 'Quiet & Subtle';
-    else if (pct <= 40) desc = 'Balanced';
-    else desc = 'Loud';
-    emotionSfxVolLabel.textContent = `${pct}% (${desc})`;
-  });
-}
 
+const popupSfxDensity = document.querySelector('#popup_sfx_density');
+const popupSfxDensityLabel = document.querySelector('#popup-sfx-density-label');
 const popupSfxVolume = document.querySelector('#popup-sfx-volume');
 const popupSfxVolLabel = document.querySelector('#popup-sfx-vol-label');
-if (popupSfxVolume && popupSfxVolLabel) {
-  popupSfxVolume.addEventListener('input', () => {
-    const val = parseFloat(popupSfxVolume.value);
-    const pct = Math.round(val * 100);
-    let desc = 'Standard';
-    if (pct === 0) desc = 'Muted';
-    else if (pct <= 15) desc = 'Very Quiet';
-    else if (pct <= 30) desc = 'Subtle';
-    else if (pct <= 55) desc = 'Standard';
+
+let totalSrtCues = 0;
+
+function updateAllSfxReadouts() {
+  // 1. Transition SFX
+  if (transitionSfxDensity && transitionSfxDensityLabel) {
+    const tDen = parseInt(transitionSfxDensity.value, 10);
+    if (tDen === 0) {
+      transitionSfxDensityLabel.textContent = '0% (Off)';
+    } else {
+      const step = Math.max(1, Math.round(100 / Math.max(tDen, 1)));
+      const estPlays = totalSrtCues > 0 ? Math.round(totalSrtCues * (tDen / 100)) : null;
+      let desc = tDen <= 35 ? `Subtle — 1 in ${step} cuts` : tDen <= 70 ? `Moderate — 1 in ${step} cuts` : 'Frequent';
+      if (tDen === 100) desc = 'Every Cut';
+      const playsStr = estPlays !== null ? ` / ~${estPlays} plays` : '';
+      transitionSfxDensityLabel.textContent = `${tDen}% (${desc}${playsStr})`;
+    }
+  }
+
+  if (transitionSfxVolume && transitionSfxVolLabel) {
+    const tVol = parseInt(transitionSfxVolume.value, 10);
+    let desc = 'Quiet & Subtle';
+    if (tVol === 0) desc = 'Muted';
+    else if (tVol <= 10) desc = 'Very Quiet';
+    else if (tVol <= 20) desc = 'Quiet & Subtle';
+    else if (tVol <= 40) desc = 'Balanced';
     else desc = 'Loud';
-    popupSfxVolLabel.textContent = `${pct}% (${desc})`;
-  });
+    transitionSfxVolLabel.textContent = `${tVol}% (${desc})`;
+  }
+
+  // 2. Emotion SFX
+  if (emotionSfxDensity && emotionSfxDensityLabel) {
+    const eDen = parseInt(emotionSfxDensity.value, 10);
+    if (eDen === 0) {
+      emotionSfxDensityLabel.textContent = '0% (Off)';
+    } else {
+      const estSounds = totalSrtCues > 0 ? Math.round(totalSrtCues * (eDen / 100)) : null;
+      let desc = eDen <= 15 ? 'Subtle' : eDen <= 35 ? 'Balanced' : 'High Energy';
+      const estStr = estSounds !== null ? ` — ~${estSounds} sounds in video` : '';
+      emotionSfxDensityLabel.textContent = `${eDen}% (${desc}${estStr})`;
+    }
+  }
+
+  if (emotionSfxVolume && emotionSfxVolLabel) {
+    const eVol = parseInt(emotionSfxVolume.value, 10);
+    let desc = 'Quiet & Subtle';
+    if (eVol === 0) desc = 'Muted';
+    else if (eVol <= 10) desc = 'Very Quiet';
+    else if (eVol <= 20) desc = 'Quiet & Subtle';
+    else if (eVol <= 40) desc = 'Balanced';
+    else desc = 'Loud';
+    emotionSfxVolLabel.textContent = `${eVol}% (${desc})`;
+  }
+
+  // 3. Popup SFX
+  if (popupSfxDensity && popupSfxDensityLabel) {
+    const pDen = parseInt(popupSfxDensity.value, 10);
+    if (pDen === 0) {
+      popupSfxDensityLabel.textContent = '0% (Off)';
+    } else {
+      const estPopups = totalSrtCues > 0 ? Math.round(totalSrtCues * (pDen / 100)) : null;
+      let desc = pDen <= 20 ? 'Subtle' : pDen <= 40 ? 'Standard' : 'Frequent';
+      if (pDen === 100) desc = 'Every Popup';
+      const estStr = estPopups !== null ? ` — ~${estPopups} sounds in video` : '';
+      popupSfxDensityLabel.textContent = `${pDen}% (${desc}${estStr})`;
+    }
+  }
+
+  if (popupSfxVolume && popupSfxVolLabel) {
+    const pVol = parseInt(popupSfxVolume.value, 10);
+    let desc = 'Standard';
+    if (pVol === 0) desc = 'Muted';
+    else if (pVol <= 15) desc = 'Very Quiet';
+    else if (pVol <= 30) desc = 'Standard';
+    else if (pVol <= 55) desc = 'Loud';
+    else desc = 'Ultra Loud';
+    popupSfxVolLabel.textContent = `${pVol}% (${desc})`;
+  }
 }
+
+[transitionSfxDensity, transitionSfxVolume, emotionSfxDensity, emotionSfxVolume, popupSfxDensity, popupSfxVolume].forEach(slider => {
+  if (slider) slider.addEventListener('input', updateAllSfxReadouts);
+});
+updateAllSfxReadouts();
 
 const colorBoostSlider = document.querySelector('#color-boost-slider');
 const colorBoostBadge = document.querySelector('#color-boost-badge');
@@ -252,8 +319,19 @@ imageFolder.addEventListener('change', () => {
   imageSummary.textContent = count ? `${count} image${count === 1 ? '' : 's'} selected.` : 'Choose a folder. Images are used in alphabetical order.';
 });
 
-srtFile.addEventListener('change', () => {
-  srtSummary.textContent = srtFile.files[0]?.name || 'Select the SRT file whose cue times control the slideshow.';
+srtFile.addEventListener('change', async () => {
+  const file = srtFile.files[0];
+  srtSummary.textContent = file?.name || 'Select the SRT file whose cue times control the slideshow.';
+  if (file) {
+    try {
+      totalSrtCues = await countSrtCues(file);
+    } catch (e) {
+      totalSrtCues = 0;
+    }
+  } else {
+    totalSrtCues = 0;
+  }
+  updateAllSfxReadouts();
 });
 
 audioFile.addEventListener('change', () => {
@@ -315,6 +393,13 @@ form.addEventListener('submit', async (event) => {
       data.append('custom_sfx', file, file.name);
     });
   }
+
+  if (transitionSfxDensity) {
+    data.append('transition_sfx_density', transitionSfxDensity.value);
+  }
+  if (transitionSfxVolume) {
+    data.append('transition_sfx_volume', (parseFloat(transitionSfxVolume.value) / 100).toFixed(3));
+  }
   
   data.append('ai_provider', aiProvider.value);
   data.append('api_key', apiKey.value);
@@ -324,11 +409,17 @@ form.addEventListener('submit', async (event) => {
       data.append('custom_intensity', file, file.name);
     });
   }
+  if (emotionSfxDensity) {
+    data.append('emotion_sfx_density', emotionSfxDensity.value);
+  }
   if (emotionSfxVolume) {
-    data.append('emotion_sfx_volume', emotionSfxVolume.value);
+    data.append('emotion_sfx_volume', (parseFloat(emotionSfxVolume.value) / 100).toFixed(3));
+  }
+  if (popupSfxDensity) {
+    data.append('popup_sfx_density', popupSfxDensity.value);
   }
   if (popupSfxVolume) {
-    data.append('popup_sfx_volume', popupSfxVolume.value);
+    data.append('popup_sfx_volume', (parseFloat(popupSfxVolume.value) / 100).toFixed(3));
   }
   
   data.append('enable_popups', enablePopups.checked ? 'true' : 'false');

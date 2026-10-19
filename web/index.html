@@ -87,7 +87,38 @@
             <label for="custom-sfx" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block;">Upload custom sounds:</label>
             <input id="custom-sfx" name="custom_sfx" type="file" accept="audio/*" multiple>
           </div>
-          <p class="hint" style="margin-top: 0.5rem;">If multiple sounds are selected, one will be picked randomly for each image transition.</p>
+
+          <!-- Transition Sound Frequency (Amount) -->
+          <div style="margin-top: 0.9rem; background: rgba(0,0,0,0.22); border-radius: 6px; padding: 0.65rem 0.85rem; border: 1px solid var(--line);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <label for="transition_sfx_density" style="font-size: 0.88em; font-weight: 600;">Transition Sound Amount (Frequency):</label>
+              <span id="transition-sfx-density-label" style="font-size: 0.82em; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace;">25% (Subtle — 1 in 4 cuts)</span>
+            </div>
+            <input type="range" id="transition_sfx_density" name="transition_sfx_density" min="0" max="100" step="1" value="25" style="width: 100%; accent-color: var(--accent); cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 3px;">
+              <span>0% (Off)</span>
+              <span>25% (Subtle — 1 in 4)</span>
+              <span>50% (Moderate — 1 in 2)</span>
+              <span>100% (Every Cut)</span>
+            </div>
+          </div>
+
+          <!-- Transition Sound Volume -->
+          <div style="margin-top: 0.6rem; background: rgba(0,0,0,0.22); border-radius: 6px; padding: 0.65rem 0.85rem; border: 1px solid var(--line);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <label for="transition_sfx_volume" style="font-size: 0.88em; font-weight: 600;">Transition Sound Volume:</label>
+              <span id="transition-sfx-vol-label" style="font-size: 0.82em; font-weight: 700; color: #38bdf8; font-family: 'DM Mono', monospace;">15% (Quiet & Subtle)</span>
+            </div>
+            <input type="range" id="transition_sfx_volume" name="transition_sfx_volume" min="0" max="100" step="1" value="15" style="width: 100%; accent-color: #38bdf8; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 3px;">
+              <span>Muted (0%)</span>
+              <span>Quiet (15%)</span>
+              <span>Balanced (30%)</span>
+              <span>Loud (60%+)</span>
+            </div>
+          </div>
+
+          <p class="hint" style="margin-top: 0.5rem;">Controls how often and how loud sound effects play during image transitions.</p>
         </fieldset>
 
         <fieldset class="field-group">
@@ -117,12 +148,35 @@
             <label for="custom-intensity" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block; margin-top: 1rem;">Select a local folder of sound effects (or emotion sounds):</label>
             <input id="custom-intensity" name="custom_intensity" type="file" accept="audio/*" webkitdirectory multiple>
           </div>
-          <div style="margin-top: 1rem; background: rgba(0,0,0,0.04); border-radius: 6px; padding: 0.6rem 0.8rem; border: 1px solid rgba(0,0,0,0.08);">
+
+          <!-- Emotion Sound Frequency (Amount) -->
+          <div style="margin-top: 1rem; background: rgba(0,0,0,0.22); border-radius: 6px; padding: 0.65rem 0.85rem; border: 1px solid var(--line);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-              <label for="emotion-sfx-volume" style="font-size: 0.9em; font-weight: 600;">Emotion SFX Volume:</label>
-              <span id="emotion-sfx-vol-label" style="font-size: 0.85em; font-weight: 700; color: #0284c7;">15% (Quiet & Subtle)</span>
+              <label for="emotion_sfx_density" style="font-size: 0.88em; font-weight: 600;">Emotion Sound Amount (Frequency):</label>
+              <span id="emotion-sfx-density-label" style="font-size: 0.82em; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace;">25% (Balanced)</span>
             </div>
-            <input type="range" id="emotion-sfx-volume" name="emotion_sfx_volume" min="0" max="1" step="0.01" value="0.15" style="width: 100%;">
+            <input type="range" id="emotion_sfx_density" name="emotion_sfx_density" min="0" max="100" step="1" value="25" style="width: 100%; accent-color: var(--accent); cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 3px;">
+              <span>Off (0%)</span>
+              <span>Subtle (15%)</span>
+              <span>Balanced (25%)</span>
+              <span>Frequent (50%+)</span>
+            </div>
+          </div>
+
+          <!-- Emotion SFX Volume -->
+          <div style="margin-top: 0.6rem; background: rgba(0,0,0,0.22); border-radius: 6px; padding: 0.65rem 0.85rem; border: 1px solid var(--line);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <label for="emotion-sfx-volume" style="font-size: 0.88em; font-weight: 600;">Emotion SFX Volume:</label>
+              <span id="emotion-sfx-vol-label" style="font-size: 0.82em; font-weight: 700; color: #38bdf8; font-family: 'DM Mono', monospace;">15% (Quiet & Subtle)</span>
+            </div>
+            <input type="range" id="emotion-sfx-volume" name="emotion_sfx_volume" min="0" max="100" step="1" value="15" style="width: 100%; accent-color: #38bdf8; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 3px;">
+              <span>Muted (0%)</span>
+              <span>Quiet (15%)</span>
+              <span>Balanced (30%)</span>
+              <span>Loud (60%+)</span>
+            </div>
           </div>
           <p class="hint" style="margin-top: 0.5rem;">AI analyzes subtitle dialogue and places matching sound effects from your SFX folder at the right moments.</p>
         </fieldset>
@@ -158,17 +212,34 @@
             <label for="custom-popup-sfx" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block;">Upload your own custom popup sound (Optional override):</label>
             <input id="custom-popup-sfx" name="custom_popup_sfx" type="file" accept="audio/*">
           </div>
-          <div style="margin-top: 1rem; background: rgba(0,0,0,0.04); border-radius: 6px; padding: 0.6rem 0.8rem; border: 1px solid rgba(0,0,0,0.08);">
+
+          <!-- Popup Sound Frequency (Amount) -->
+          <div style="margin-top: 1rem; background: rgba(0,0,0,0.22); border-radius: 6px; padding: 0.65rem 0.85rem; border: 1px solid var(--line);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-              <label for="popup-sfx-volume" style="font-size: 0.9em; font-weight: 600;">Popup Sound Volume:</label>
-              <span id="popup-sfx-vol-label" style="font-size: 0.85em; font-weight: 700; color: #0284c7;">40% (Standard)</span>
+              <label for="popup_sfx_density" style="font-size: 0.88em; font-weight: 600;">Popup Sound Amount (Frequency):</label>
+              <span id="popup-sfx-density-label" style="font-size: 0.82em; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace;">30% (Standard)</span>
             </div>
-            <input type="range" id="popup-sfx-volume" name="popup_sfx_volume" min="0" max="1" step="0.01" value="0.40" style="width: 100%;">
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 2px;">
-              <span>Muted (0%)</span>
+            <input type="range" id="popup_sfx_density" name="popup_sfx_density" min="0" max="100" step="1" value="30" style="width: 100%; accent-color: var(--accent); cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 3px;">
+              <span>Off (0%)</span>
               <span>Subtle (20%)</span>
-              <span>Standard (40%)</span>
-              <span>Loud (70%+)</span>
+              <span>Standard (30%)</span>
+              <span>Every Popup (100%)</span>
+            </div>
+          </div>
+
+          <!-- Popup Sound Volume -->
+          <div style="margin-top: 0.6rem; background: rgba(0,0,0,0.22); border-radius: 6px; padding: 0.65rem 0.85rem; border: 1px solid var(--line);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <label for="popup-sfx-volume" style="font-size: 0.88em; font-weight: 600;">Popup Sound Volume:</label>
+              <span id="popup-sfx-vol-label" style="font-size: 0.82em; font-weight: 700; color: #38bdf8; font-family: 'DM Mono', monospace;">25% (Standard)</span>
+            </div>
+            <input type="range" id="popup-sfx-volume" name="popup_sfx_volume" min="0" max="100" step="1" value="25" style="width: 100%; accent-color: #38bdf8; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 3px;">
+              <span>Muted (0%)</span>
+              <span>Subtle (15%)</span>
+              <span>Standard (25%)</span>
+              <span>Loud (60%+)</span>
             </div>
           </div>
           <p class="hint" style="margin-top: 0.5rem;">Works automatically out-of-the-box using the bundled `popups` folder, or uses your AI key if provided.</p>
