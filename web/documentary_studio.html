@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Documentary Cinema Studio | Bahaa AI</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="stylesheet" href="/documentary_studio.css">
+</head>
+<body>
+  <div class="doc-shell">
+    
+    <!-- Top Header -->
+    <header class="doc-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon-gold" aria-hidden="true">🏛️</div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <h1 class="brand-title">Auto Documentary Studio</h1>
+            <span class="brand-badge-doc">1-CLICK CINEMA</span>
+            <span class="brand-badge-ai">✨ FLUX 8K AI IMAGERY</span>
+          </div>
+          <p class="brand-subtitle">
+            Automated Long-Form History Videos • Hyper-Realistic AI Scenes • Museum Masterpieces • Clause-Timed Neural Voice • Zero AI Slop
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Preserves all other pages) -->
+      <nav class="mode-nav" aria-label="Generator Modes">
+        <a href="/" class="nav-tab">
+          <span>⚡ Classic</span>
+        </a>
+        <a href="/studio.html" class="nav-tab">
+          <span>🎛️ Studio Pro</span>
+        </a>
+        <a href="/scene_studio.html" class="nav-tab">
+          <span>🎬 Scene & Grid</span>
+        </a>
+        <a href="/documentary_studio.html" class="nav-tab active">
+          <span>🏛️ Documentary Pro</span>
+          <span class="nav-badge-pill">ACTIVE</span>
+        </a>
+      </nav>
+    </header>
+
+    <!-- Preset Selection Bar (Sleek Horizontal Rail) -->
+    <section class="preset-section">
+      <div class="section-label-row">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="section-label">⚡ 1-Click Historical Presets</span>
+          <span style="font-size: 0.78rem; color: var(--text-dim);">Click to load full multi-act outline & narration</span>
+        </div>
+        <div class="rail-hint">Scroll for more ➔</div>
+      </div>
+      <div class="preset-rail" id="presetGrid">
+        <!-- Preset cards dynamically rendered or loaded from JS -->
+        <div class="preset-card active" data-preset="israel_history">
+          <div class="preset-top">
+            <span class="preset-tag">EPIC CHRONICLE</span>
+            <span class="preset-era">66 AD - Modern</span>
+          </div>
+          <div class="preset-name">2000 Years of Israel History</div>
+          <div class="preset-desc">Masada cliffs, Roman legions, Crusades, Ottomans & 1948 countryballs.</div>
+        </div>
+
+        <div class="preset-card" data-preset="rome_fall">
+          <div class="preset-top">
+            <span class="preset-tag">CLASSICAL ROME</span>
+            <span class="preset-era">509 BC - 476 AD</span>
+          </div>
+          <div class="preset-name">1000 Years of the Roman Empire</div>
+          <div class="preset-desc">Senate speeches, Colosseum spectacles, Caesar, legions & barbarian fall.</div>
+        </div>
+
+        <div class="preset-card" data-preset="french_revolution">
+          <div class="preset-top">
+            <span class="preset-tag">REVOLUTION</span>
+            <span class="preset-era">1789 - 1804</span>
+          </div>
+          <div class="preset-name">The French Revolution Explained</div>
+          <div class="preset-desc">Storming of Bastille, Versailles gates, Guillotine terror & rise of Napoleon.</div>
+        </div>
+
+        <div class="preset-card" data-preset="battle_of_hastings">
+          <div class="preset-top">
+            <span class="preset-tag">MEDIEVAL</span>
+            <span class="preset-era">October 1066</span>
+          </div>
+          <div class="preset-name">The Battle of Hastings 1066</div>
+          <div class="preset-desc">Saxon shield wall on Senlac Hill vs William the Conqueror's knights.</div>
+        </div>
+
+        <div class="preset-card" data-preset="ww1_overview">
+          <div class="preset-top">
+            <span class="preset-tag">MODERN WAR</span>
+            <span class="preset-era">1914 - 1918</span>
+          </div>
+          <div class="preset-name">World War I: The Great Conflict</div>
+          <div class="preset-desc">Sarajevo assassination, trench mud, barbed wire, artillery & armistice.</div>
+        </div>
+
+        <div class="preset-card" data-preset="human_evolution">
+          <div class="preset-top">
+            <span class="preset-tag">PREHISTORY</span>
+            <span class="preset-era">200,000 BP</span>
+          </div>
+          <div class="preset-name">The Dawn of Humanity</div>
+          <div class="preset-desc">Ice Age mammoth hunts, cave fire, language dawn & agricultural rise.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Master Layout Grid (Balanced 2-Column with Sticky Stage) -->
+    <div class="doc-grid">
+
+      <!-- LEFT COLUMN: Production Control Deck -->
+      <div class="doc-deck">
+
+        <!-- Card 1: Core Configuration -->
+        <div class="deck-card">
+          <div class="card-head">
+            <div class="card-head-icon">🎬</div>
+            <div>
+              <h2 class="card-title">Documentary Topic & Scope</h2>
+              <p class="card-subtitle">AI Historian will research, structure, and script the entire video</p>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="topicInput">Documentary Title / Topic</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="topicInput" value="2000 Years of Israel History in 35 Minutes" placeholder="e.g., 2000 Years of Israel History, Rise of the Samurai, The Space Race...">
+              <button class="btn-secondary" id="btnResearchOutline" title="Generate multi-chapter AI outline">
+                🔍 Research Outline
+              </button>
+            </div>
+          </div>
+
+          <!-- Duration Pill Selector -->
+          <div class="form-field">
+            <label>Target Duration & Chapter Pacing</label>
+            <div class="duration-pills">
+              <div class="dur-pill">
+                <input type="radio" id="dur_1m" name="duration" value="1">
+                <label for="dur_1m">
+                  <strong>1 Min</strong>
+                  <small>~140w • 8 scenes</small>
+                </label>
+              </div>
+              <div class="dur-pill">
+                <input type="radio" id="dur_3m" name="duration" value="3" checked>
+                <label for="dur_3m">
+                  <strong>3 Min</strong>
+                  <small>~450w • 22 scenes</small>
+                </label>
+              </div>
+              <div class="dur-pill">
+                <input type="radio" id="dur_5m" name="duration" value="5">
+                <label for="dur_5m">
+                  <strong>5 Min</strong>
+                  <small>~750w • 38 scenes</small>
+                </label>
+              </div>
+              <div class="dur-pill">
+                <input type="radio" id="dur_10m" name="duration" value="10">
+                <label for="dur_10m">
+                  <strong>10 Min</strong>
+                  <small>~1500w • 75 scenes</small>
+                </label>
+              </div>
+              <div class="dur-pill">
+                <input type="radio" id="dur_15m" name="duration" value="15">
+                <label for="dur_15m">
+                  <strong>15 Min</strong>
+                  <small>~2200w • 110 scenes</small>
+                </label>
+              </div>
+              <div class="dur-pill">
+                <input type="radio" id="dur_30m" name="duration" value="30">
+                <label for="dur_30m">
+                  <strong>30 Min</strong>
+                  <small>~4500w • 220 scenes</small>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Voice & AI Image Engine Row -->
+          <div class="form-row">
+            <div class="form-field">
+              <label for="voiceSelect">Narrator Voice (Edge Neural)</label>
+              <select id="voiceSelect">
+                <option value="en-US-ChristopherNeural" selected>Christopher Neural (Authoritative Documentary)</option>
+                <option value="en-US-GuyNeural">Guy Neural (Punchy Historical Narrative)</option>
+                <option value="en-US-RogerNeural">Roger Neural (Dramatic & Intense)</option>
+                <option value="en-GB-RyanNeural">Ryan Neural (British Historian Accent)</option>
+                <option value="en-US-AndrewNeural">Andrew Neural (Warm & Engaging)</option>
+                <option value="en-US-EricNeural">Eric Neural (Clear & Modern)</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="aiImageProviderSelect">AI Visual Image Engine</label>
+              <select id="aiImageProviderSelect">
+                <option value="flux" selected>🤖 Pollinations Flux AI (Free • Hyper-Realistic 8K)</option>
+                <option value="nvidia">⚡ NVIDIA NIM FLUX.1 (Dev / Schnell - Cloud GPU)</option>
+                <option value="hybrid">✨ Hybrid AI & Museum Archive (Flux + Oil Paintings)</option>
+                <option value="museum">🏛️ Museum Historical Archive Only (Wikimedia Public Domain)</option>
+                <option value="openai">🎨 OpenAI DALL-E 3 (Requires OpenAI Key)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Image Style & Subtitles Row -->
+          <div class="form-row">
+            <div class="form-field">
+              <label for="imageStyleSelect">Cinematic Visual Art Style</label>
+              <select id="imageStyleSelect">
+                <option value="cinematic_oil" selected>Cinematic Oil Painting Masterpiece (Recommended)</option>
+                <option value="hyper_realistic">Photorealistic 35mm Historical Documentary</option>
+                <option value="vintage_archival">Atmospheric Vintage Archival Photography</option>
+                <option value="graphic_illustrated">Detailed Graphic Novel ArtStation Style</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="subtitleStyle">Subtitle Era Badge Style</label>
+              <select id="subtitleStyle">
+                <option value="gold_pill" selected>Gold Era Badge + Clean Yellow Subs</option>
+                <option value="cyan_pill">Cyan Modern Pill + White Subs</option>
+                <option value="bold_outline">Bold Cinematic Outline</option>
+                <option value="minimalist">Minimalist Bottom Subtitles</option>
+                <option value="none">No Subtitles (Clean Video)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sound Effects Controls -->
+          <div class="form-row">
+            <div class="form-field" style="grid-column: 1 / -1;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="sfxSlider" style="margin-bottom: 0;">Subtle Sound Effects (Strict 25s Cooldown)</label>
+                <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-muted); cursor: pointer;">
+                  <input type="checkbox" id="muteSfxCheckbox">
+                  <span>Mute SFX (Voiceover Only)</span>
+                </label>
+              </div>
+              <div class="slider-container" style="padding-top: 6px;">
+                <input type="range" id="sfxSlider" min="0" max="100" value="12">
+                <span class="slider-val" id="sfxVal">12% (Subtle Ambience)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Toggles -->
+          <div class="feature-toggles-bar">
+            <label class="toggle-pill">
+              <input type="checkbox" id="toggleDatePill" checked>
+              <span>🏷️ Broadcast-Safe Date Pill (e.g. 1789 • PARIS)</span>
+            </label>
+            <label class="toggle-pill">
+              <input type="checkbox" id="toggleArchiveArt" checked>
+              <span>🏛️ Interleave Museum Historical Art</span>
+            </label>
+            <label class="toggle-pill">
+              <input type="checkbox" id="toggleCountryballs" checked>
+              <span>🌍 Geopolitical Maps & Countryballs</span>
+            </label>
+          </div>
+
+          <!-- Optional Collapsible API Key Details -->
+          <details class="api-accordion" style="margin-top: 14px;" open>
+            <summary style="font-size: 0.82rem; color: #38bdf8; cursor: pointer; user-select: none; font-weight: 600;">
+              ⚡ AI Cloud API Configuration (NVIDIA NIM • FLUX.1 • Llama 3.3 70B • OpenAI)
+            </summary>
+            <div style="display: grid; grid-template-columns: 1.2fr 1.6fr 1fr; gap: 10px; margin-top: 10px; padding: 14px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-sm); align-items: flex-end;">
+              <div class="form-field" style="margin-bottom: 0;">
+                <label for="aiProviderSelect" style="font-size: 0.76rem; color: var(--text-dim);">Research LLM Provider</label>
+                <select id="aiProviderSelect" style="padding: 8px 10px; font-size: 0.82rem;">
+                  <option value="nvidia" selected>⚡ NVIDIA NIM (Llama 3.3 70B)</option>
+                  <option value="openai">OpenAI (GPT-4o)</option>
+                  <option value="groq">Groq (Llama 3.3 Fast)</option>
+                </select>
+              </div>
+              <div class="form-field" style="margin-bottom: 0;">
+                <label for="apiKeyInput" style="font-size: 0.76rem; color: var(--text-dim); display: flex; justify-content: space-between;">
+                  <span>API Key</span>
+                  <span id="keyTypeHint" style="color: #38bdf8; font-weight: 600;">nvapi-...</span>
+                </label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="password" id="apiKeyInput" placeholder="nvapi-... or sk-..." style="padding: 8px 10px; font-size: 0.82rem; flex: 1;">
+                  <button type="button" id="btnTestApiKey" style="padding: 8px 12px; font-size: 0.78rem; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; border-radius: 6px; cursor: pointer; font-weight: 600; white-space: nowrap;">
+                    ⚡ Test Key
+                  </button>
+                </div>
+              </div>
+              <div class="form-field" style="margin-bottom: 0;">
+                <label for="apiModelInput" style="font-size: 0.76rem; color: var(--text-dim);">Model (Optional)</label>
+                <input type="text" id="apiModelInput" placeholder="meta/llama-3.3-70b-instruct" style="padding: 8px 10px; font-size: 0.82rem;">
+              </div>
+              <div id="apiKeyStatusBox" style="grid-column: 1 / -1; display: none; margin-top: 6px; padding: 8px 12px; border-radius: 6px; font-size: 0.8rem;"></div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Card 2: AI Script & Chapter Outline Accordion -->
+        <div class="deck-card">
+          <div class="card-head" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="card-head-icon">📜</div>
+              <div>
+                <h2 class="card-title">Chapter Outline & Narration Script</h2>
+                <p class="card-subtitle">Review or customize your generated documentary chronicle</p>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge-accent" id="scriptWordsBadge">0 Words</span>
+              <span class="badge-dim" id="chapterCountBadge">0 Chapters</span>
+            </div>
+          </div>
+
+          <!-- Custom Script Override Checkbox -->
+          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="overrideCustomScriptCheckbox">
+            <label for="overrideCustomScriptCheckbox" style="font-size: 0.82rem; color: #fde68a; cursor: pointer; font-weight: 600;">
+              ✏️ Override Scaled Chronicle with this Custom Script (Only check if you want to bypass auto duration)
+            </label>
+          </div>
+
+          <div class="form-field">
+            <label for="customScriptInput" style="display: flex; justify-content: space-between;">
+              <span>Documentary Narration Script</span>
+              <span style="font-size: 0.74rem; color: var(--text-dim);">Edit text to modify speech voiceover</span>
+            </label>
+            <textarea id="customScriptInput" rows="6" placeholder="Documentary script will appear here automatically upon selecting a preset or clicking 'Research Outline'..." spellcheck="false"></textarea>
+          </div>
+
+          <!-- Structured Chapter Accordion List -->
+          <div class="chapter-accordion-list" id="chapterList">
+            <!-- Dynamically populated chapters -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Sticky Cinema Monitor & Live HUD -->
+      <div class="doc-monitor-column">
+
+        <!-- Cinema Video Player & Stage -->
+        <div class="monitor-frame">
+          <div class="monitor-header">
+            <div class="live-indicator">
+              <span class="live-dot" id="liveDot"></span>
+              <span id="monitorStatusText">CINEMA MONITOR — READY</span>
+            </div>
+            <!-- Aspect Ratio Selector Pills -->
+            <div class="aspect-pill-group">
+              <button class="aspect-btn active" id="btnAspect169" type="button" data-ratio="16:9">16:9 Cinema</button>
+              <button class="aspect-btn" id="btnAspect916" type="button" data-ratio="9:16">9:16 Shorts</button>
+            </div>
+          </div>
+
+          <div class="monitor-screen" id="monitorScreen">
+            <video id="cinemaVideo" controls playsinline style="display: none;"></video>
+            <div class="screen-placeholder" id="monitorPlaceholder">
+              <div class="screen-placeholder-icon">🏛️</div>
+              <h3 style="font-size: 1.15rem; color: #ffffff; margin-bottom: 4px;">Cinema Documentary Stage</h3>
+              <p style="font-size: 0.84rem; max-width: 360px; line-height: 1.5; color: var(--text-muted);">
+                Pick a topic on the left and click <strong>Generate Full Documentary</strong> below to render full-length video with AI imagery & neural voiceover.
+              </p>
+            </div>
+          </div>
+
+          <!-- Primary 1-Click Launch Button -->
+          <div style="padding: 16px 20px; background: rgba(10, 14, 23, 0.95); border-top: 1px solid var(--border-subtle);">
+            <button class="btn-launch-master" id="btnLaunchDocumentary">
+              <span>🚀 Generate Full Documentary Video (1-Click)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Production HUD Card -->
+        <div class="hud-card" id="hudCard">
+          <div class="hud-top">
+            <div>
+              <div class="hud-phase-label" id="hudPhaseLabel">Directing Scenes & Synthesizing AI Imagery...</div>
+              <div style="font-size: 0.78rem; color: var(--text-dim);" id="hudDetailLabel">Generating chapter 1 visual scene...</div>
+            </div>
+            <div class="hud-pct" id="hudPct">0%</div>
+          </div>
+
+          <div class="hud-progress-track">
+            <div class="hud-progress-bar" id="hudProgressBar"></div>
+          </div>
+
+          <div class="hud-stats-row">
+            <div class="hud-stat-col">
+              <span>Current Stage</span>
+              <strong id="hudStatStage">Initializing</strong>
+            </div>
+            <div class="hud-stat-col">
+              <span>Elapsed</span>
+              <strong id="hudStatElapsed">00:00</strong>
+            </div>
+            <div class="hud-stat-col">
+              <span>Est. Remaining</span>
+              <strong id="hudStatEst">Calculating...</strong>
+            </div>
+          </div>
+
+          <div class="hud-actions">
+            <button class="btn-cancel" id="btnCancelJob">✕ Cancel Production</button>
+            <a class="btn-download-master" id="btnDownloadVideo" href="#" download>
+              ⬇️ Download Master Video (.mp4)
+            </a>
+          </div>
+        </div>
+
+        <!-- Scene Breakdown Timeline Strip -->
+        <div class="scene-strip-card" id="sceneStripCard" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">🎬 Staged Visual Scenes</span>
+            <span style="font-size: 0.74rem; color: var(--text-dim);" id="sceneCountBadge">0 Scenes</span>
+          </div>
+          <div class="scene-strip" id="sceneStrip">
+            <!-- Dynamically populated scene cards -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="/documentary_studio.js"></script>
+</body>
+</html>

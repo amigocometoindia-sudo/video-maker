@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRT Video Generator</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <div class="mode-nav-bar">
+      <div class="mode-tabs">
+        <a href="/" class="mode-tab active">⚡ Standard Generator</a>
+        <a href="/studio.html" class="mode-tab">
+          <span>🎛️ Studio Pro Mode</span>
+          <span class="mode-badge-new">NEW</span>
+        </a>
+        <a href="/scene_studio.html" class="mode-tab">
+          <span>🎬 Scene & Grid Studio</span>
+        </a>
+        <a href="/documentary_studio.html" class="mode-tab" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">
+          <span>🏛️ 1-Click AI Documentary</span>
+        </a>
+      </div>
+      <p class="eyebrow" style="margin: 0;">
+        LOCAL VIDEO TOOL <span id="app-version">v--</span>
+      </p>
+    </div>
+    <header>
+      <p class="eyebrow">
+        <span class="developer-credit">Developed by: Bahaa Mahmoud -
+          <a href="https://BahaaMahmoud.com" target="_blank" rel="noopener noreferrer">BahaaMahmoud.com</a> -
+          <a href="https://Bahaa-ai.com" target="_blank" rel="noopener noreferrer">Bahaa-ai.com</a>
+        </span>
+      </p>
+      <div class="brand-lockup">
+        <span class="app-mark" aria-hidden="true"></span>
+        <h1 id="app-name">SRT Video Generator</h1>
+      </div>
+      <p id="app-description" class="intro">Create timestamp-synchronized slideshow videos from images, SRT subtitles, and optional audio.</p>
+    </header>
+
+    <div class="workspace">
+      <form id="generator-form" class="controls">
+        <fieldset class="field-group ratio-group">
+          <legend>Video aspect ratio</legend>
+          <label class="radio-option">
+            <input type="radio" name="aspect_ratio" value="16:9" checked>
+            <span>16:9 <small>Landscape</small></span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="aspect_ratio" value="9:16">
+            <span>9:16 <small>Portrait</small></span>
+          </label>
+        </fieldset>
+
+        <section class="field-group">
+          <label for="image-folder">Images</label>
+          <input id="image-folder" name="images" type="file" accept="image/*" webkitdirectory multiple required>
+          <p id="image-summary" class="hint">Choose a folder. Natural filename order is used.</p>
+        </section>
+
+        <section class="field-group">
+          <label for="srt-file">Subtitle timing</label>
+          <input id="srt-file" name="srt_file" type="file" accept=".srt,text/srt" required>
+          <p id="srt-summary" class="hint">Select the SRT file whose cue times control the slideshow.</p>
+        </section>
+
+        <section class="field-group">
+          <label for="audio-file">Audio <span class="optional">(optional)</span></label>
+          <input id="audio-file" name="audio_file" type="file" accept="audio/*">
+          <p id="audio-summary" class="hint">Add music or narration to the video.</p>
+        </section>
+
+        <label class="checkbox-row" for="apply-zoom">
+          <input id="apply-zoom" name="apply_zoom" type="checkbox" checked>
+          <span>Apply animated zoom <small>Zoom each image between 100% and 105%.</small></span>
+        </label>
+
+        <fieldset class="field-group">
+          <legend>Image-change sound effects <span class="optional">(optional)</span></legend>
+          <div id="bundled-sfx-container" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <!-- populated by JS -->
+          </div>
+          <div style="margin-top: 1rem;">
+            <label for="custom-sfx" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block;">Upload custom sounds:</label>
+            <input id="custom-sfx" name="custom_sfx" type="file" accept="audio/*" multiple>
+          </div>
+          <p class="hint" style="margin-top: 0.5rem;">If multiple sounds are selected, one will be picked randomly for each image transition.</p>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>AI Dialogue Sound Effects & Emotion SFX <span class="optional">(optional)</span></legend>
+          <div style="margin-bottom: 0.5rem;">
+            <label for="ai-provider" style="font-size: 0.9em;">AI Provider:</label>
+            <select id="ai-provider" name="ai_provider">
+              <option value="openai">OpenAI (ChatGPT)</option>
+              <option value="gemini">Gemini</option>
+              <option value="nvidia">NVIDIA NIM</option>
+              <option value="bytez">Bytez API</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label for="api-key" style="font-size: 0.9em;">API Key:</label>
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                <input type="password" id="api-key" name="api_key" placeholder="Enter API Key" style="flex: 1; padding: 0.25rem;">
+                <button type="button" id="clear-cache-button" style="padding: 0.25rem 0.5rem; font-size: 0.85em; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Clear AI Cache</button>
+            </div>
+          </div>
+          <div id="bytez-model-container" style="margin-bottom: 1rem; display: none;">
+            <label for="api-model" style="font-size: 0.9em;">Bytez Model ID (Check your Bytez dashboard):</label>
+            <input type="text" id="api-model" name="api_model" value="google/gemma-2-9b-it" style="width: 100%; padding: 0.25rem;">
+          </div>
+          <div style="margin-top: 1rem;">
+            <p style="font-size: 0.9em; margin-bottom: 0.25rem;"><strong>Available Sounds:</strong> Audio files placed in the <code>sfx</code> or <code>intensity_sfx</code> folder, or uploaded below, will be analyzed by AI. Filenames describe what the sound is (e.g. whoosh, camera shutter, beating, laughing, punch).</p>
+            <label for="custom-intensity" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block; margin-top: 1rem;">Select a local folder of sound effects (or emotion sounds):</label>
+            <input id="custom-intensity" name="custom_intensity" type="file" accept="audio/*" webkitdirectory multiple>
+          </div>
+          <div style="margin-top: 1rem; background: rgba(0,0,0,0.04); border-radius: 6px; padding: 0.6rem 0.8rem; border: 1px solid rgba(0,0,0,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <label for="emotion-sfx-volume" style="font-size: 0.9em; font-weight: 600;">Emotion SFX Volume:</label>
+              <span id="emotion-sfx-vol-label" style="font-size: 0.85em; font-weight: 700; color: #0284c7;">15% (Quiet & Subtle)</span>
+            </div>
+            <input type="range" id="emotion-sfx-volume" name="emotion_sfx_volume" min="0" max="1" step="0.01" value="0.15" style="width: 100%;">
+          </div>
+          <p class="hint" style="margin-top: 0.5rem;">AI analyzes subtitle dialogue and places matching sound effects from your SFX folder at the right moments.</p>
+        </fieldset>
+
+        <fieldset class="field-group">
+          <legend>Animated Popups & Stickers <span class="optional">(Animated History Style)</span></legend>
+          <label class="checkbox-row" for="enable-popups">
+            <input id="enable-popups" name="enable_popups" type="checkbox" checked>
+            <span>Enable Animated Popups <small>Bouncy spring overlays (Crown, Swords, Skull, Fire, Gold, etc.) synchronized to dialogue.</small></span>
+          </label>
+          <div style="margin-top: 1rem;">
+            <label for="popup-prompt" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block;">Popup Instructions (Optional):</label>
+            <textarea id="popup-prompt" name="popup_prompt" rows="3" style="width: 100%; padding: 0.5rem; resize: vertical;" placeholder="Leave blank for automatic smart heuristic matching, or specify custom instructions."></textarea>
+          </div>
+          <div style="margin-top: 1rem;">
+            <label for="custom-popups" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block;">Upload custom popup PNGs (Select a folder):</label>
+            <input id="custom-popups" name="custom_popups" type="file" accept="image/*" webkitdirectory multiple>
+          </div>
+          <div style="margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label style="font-size: 0.9em; font-weight: 600;">Popup Sound Effects (Choose which sounds to use):</label>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="btn-select-all-popups" style="padding: 2px 7px; font-size: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid var(--line); color: var(--muted); border-radius: 4px; cursor: pointer;">All</button>
+                <button type="button" id="btn-deselect-all-popups" style="padding: 2px 7px; font-size: 0.75rem; background: rgba(255,255,255,0.08); border: 1px solid var(--line); color: var(--muted); border-radius: 4px; cursor: pointer;">None</button>
+              </div>
+            </div>
+            <div id="bundled-popup-sfx-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-bottom: 0.5rem; padding: 0.6rem; background: rgba(0,0,0,0.25); border-radius: 6px; border: 1px solid var(--line); max-height: 220px; overflow-y: auto;">
+              <!-- Populated by JS with play preview buttons -->
+            </div>
+            <p class="hint">Check the sounds you want to play when character popups bounce in. Click 🔊 to preview any sound!</p>
+          </div>
+          <div style="margin-top: 0.8rem;">
+            <label for="custom-popup-sfx" style="font-size: 0.9em; margin-bottom: 0.25rem; display: block;">Upload your own custom popup sound (Optional override):</label>
+            <input id="custom-popup-sfx" name="custom_popup_sfx" type="file" accept="audio/*">
+          </div>
+          <div style="margin-top: 1rem; background: rgba(0,0,0,0.04); border-radius: 6px; padding: 0.6rem 0.8rem; border: 1px solid rgba(0,0,0,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+              <label for="popup-sfx-volume" style="font-size: 0.9em; font-weight: 600;">Popup Sound Volume:</label>
+              <span id="popup-sfx-vol-label" style="font-size: 0.85em; font-weight: 700; color: #0284c7;">40% (Standard)</span>
+            </div>
+            <input type="range" id="popup-sfx-volume" name="popup_sfx_volume" min="0" max="1" step="0.01" value="0.40" style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 2px;">
+              <span>Muted (0%)</span>
+              <span>Subtle (20%)</span>
+              <span>Standard (40%)</span>
+              <span>Loud (70%+)</span>
+            </div>
+          </div>
+          <p class="hint" style="margin-top: 0.5rem;">Works automatically out-of-the-box using the bundled `popups` folder, or uses your AI key if provided.</p>
+        </fieldset>
+
+        <div class="actions">
+          <button id="generate-button" type="submit">Generate video</button>
+          <button id="cancel-button" class="cancel-button" type="button" hidden>Cancel</button>
+        </div>
+        <p id="status" class="status" role="status"></p>
+        <section id="progress-panel" class="progress-panel" hidden>
+          <div class="progress-heading">
+            <strong id="progress-label">Preparing...</strong>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+          <p id="progress-detail" class="hint">Waiting to start...</p>
+        </section>
+        <aside class="note">
+          <strong>Timing</strong>
+          <span>Each image begins at its matching SRT cue. The final image remains visible for the final cue duration.</span>
+        </aside>
+      </form>
+
+      <section class="preview-panel" aria-labelledby="preview-title">
+        <div class="panel-heading">
+          <h2 id="preview-title">Generated video</h2>
+          <span id="preview-state" class="preview-state">No video yet</span>
+        </div>
+        <div id="preview-empty" class="preview-empty">Your finished video will appear here.</div>
+        <video id="video-preview" controls playsinline hidden></video>
+        <button id="download-button" class="download-button" type="button" hidden>Download video</button>
+
+        <!-- Dynamic Color Enhancement Bar -->
+        <div id="color-boost-panel" class="color-boost-panel" style="margin-top: 14px; padding: 12px 14px; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--line); border-radius: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label for="color-boost-slider" style="font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 6px; color: var(--ink);">
+              <span>🎨 Color Richness & Saturation:</span>
+            </label>
+            <span id="color-boost-badge" style="font-weight: 700; font-size: 11px; font-family: 'DM Mono', monospace; color: var(--bg); background: var(--accent); padding: 2px 8px; border-radius: 4px;">115% (Cinematic)</span>
+          </div>
+
+          <input type="range" id="color-boost-slider" name="color_boost" min="50" max="200" step="5" value="115" style="width: 100%; cursor: pointer; accent-color: var(--accent); margin: 6px 0;">
+
+          <!-- Visual Color Gradient Bar showing increasing intensity -->
+          <div style="height: 6px; width: 100%; border-radius: 3px; background: linear-gradient(to right, #475569 0%, #38bdf8 25%, #22c55e 50%, #eab308 75%, #ef4444 100%); margin-top: 2px;"></div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); margin-top: 5px;">
+            <span>50% (Muted)</span>
+            <span>100% (Natural)</span>
+            <span>115% (Cinematic)</span>
+            <span>150% (Vivid)</span>
+            <span>200% (Ultra)</span>
+          </div>
+
+          <!-- Quick Preset Buttons -->
+          <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-color-preset" data-val="100" style="flex: 1; padding: 4px 6px; font-size: 11px; background: rgba(255,255,255,0.06); border: 1px solid var(--line); color: var(--muted); border-radius: 4px; cursor: pointer;">100% Natural</button>
+            <button type="button" class="btn-color-preset" data-val="115" style="flex: 1; padding: 4px 6px; font-size: 11px; background: rgba(217, 255, 98, 0.15); border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; font-weight: 600;">115% Cinematic</button>
+            <button type="button" class="btn-color-preset" data-val="135" style="flex: 1; padding: 4px 6px; font-size: 11px; background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #4ade80; border-radius: 4px; cursor: pointer;">135% Vivid</button>
+            <button type="button" class="btn-color-preset" data-val="160" style="flex: 1; padding: 4px 6px; font-size: 11px; background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #fde047; border-radius: 4px; cursor: pointer;">160% High Pop</button>
+          </div>
+
+          <p class="hint" style="margin-top: 8px; font-size: 11px; color: var(--muted);">
+            Slide to adjust color intensity. Applies to video rendering & previews live on the player above!
+          </p>
+        </div>
+      </section>
+    </div>
+
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Portable Python and environments
+python/
+venv/
+.venv/
+env/
+
+# Large binaries (>100MB rejected by GitHub)
+ffmpeg/*.exe
+ffmpeg/ffmpeg
+ffmpeg/*.dll
+
+# Output renders and cache
+output/
+ai_cache/
+*.log
+
+# Large / temporary media at project root
+/*.mp4
+temp.wav

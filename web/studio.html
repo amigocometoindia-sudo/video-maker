@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Pro Video Generator | Bahaa AI</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="stylesheet" href="/studio.css">
+</head>
+<body>
+  <div class="studio-shell">
+    
+    <!-- Top Studio Header -->
+    <header class="studio-header">
+      <div class="brand-wrapper">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/>
+          </svg>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 class="brand-title">Studio Pro Video Engine</h1>
+            <span class="brand-badge" id="app-version">v1.2.0 PRO</span>
+          </div>
+          <p class="brand-subtitle">
+            Next-Gen Slideshow Engine • Developed by: Bahaa Mahmoud -
+            <a href="https://BahaaMahmoud.com" target="_blank" rel="noopener noreferrer" style="color: #cbd5e1; text-decoration: none;">BahaaMahmoud.com</a> -
+            <a href="https://Bahaa-ai.com" target="_blank" rel="noopener noreferrer" style="color: #cbd5e1; text-decoration: none;">Bahaa-ai.com</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <nav class="mode-nav" aria-label="Generator Modes">
+        <a href="/" class="nav-tab">
+          <span>⚡ Classic Mode</span>
+        </a>
+        <a href="/studio.html" class="nav-tab active">
+          <span>🎛️ Studio Pro Mode</span>
+          <span class="nav-badge-pill">ACTIVE</span>
+        </a>
+        <a href="/scene_studio.html" class="nav-tab">
+          <span>🎬 Scene & Grid Studio</span>
+        </a>
+        <a href="/documentary_studio.html" class="nav-tab" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(239, 68, 68, 0.2) 100%); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">
+          <span>🏛️ 1-Click AI Documentary</span>
+          <span class="nav-badge-pill" style="background: #f59e0b; color: #000;">FLUX 8K</span>
+        </a>
+        <button type="button" id="btn-open-manual" class="nav-tab" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.4); color: #38bdf8; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <span>📖 User Manual</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <div class="studio-grid">
+      
+      <!-- Left Column: Studio Controls Deck -->
+      <form id="studio-form" class="controls-deck" novalidate>
+
+        <!-- Generation Pipeline Selector -->
+        <div class="generator-mode-selector" style="margin-bottom: 22px;">
+          <div class="pill-group">
+            <div class="pill-option">
+              <input type="radio" id="genmode-auto" name="generator_mode" value="auto" checked>
+              <label class="pill-label" for="genmode-auto" style="padding: 12px 14px; text-align: left; align-items: flex-start;">
+                <span style="font-size: 0.92rem; color: #f8fafc;">🤖 1-Click Auto Pipeline</span>
+                <small>Prompt ➔ AI Script ➔ Voiceover ➔ Video</small>
+              </label>
+            </div>
+            <div class="pill-option">
+              <input type="radio" id="genmode-manual" name="generator_mode" value="manual">
+              <label class="pill-label" for="genmode-manual" style="padding: 12px 14px; text-align: left; align-items: flex-start;">
+                <span style="font-size: 0.92rem; color: #f8fafc;">📁 Manual Assets Mode</span>
+                <small>Upload your own Image Folder + SRT</small>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Auto Prompt & Story Engine (Active in Auto Mode) -->
+        <section id="auto-pipeline-card" class="studio-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">⚡</span>
+              <div>
+                <h2 class="card-title">1. Story Topic & Voice Narrator</h2>
+                <p class="card-desc">Type any topic (Tech & Wealth, Psychology, Science, Prehistory, or History) — AI writes, animates & narrates it</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-field" style="margin-bottom: 14px;">
+            <label for="auto-topic">Topic or Video Title *</label>
+            <input type="text" id="auto-topic" name="auto_topic" placeholder="e.g. Why You Overthink (or How Elon Musk Got Rich, What Ancient Humans Did)" style="font-size: 0.95rem; padding: 12px;">
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="auto-voice">Voice Narrator (Edge Neural TTS)</label>
+              <select id="auto-voice" name="auto_voice">
+                <option value="en-US-ChristopherNeural" selected>Christopher (US) - Authoritative Documentary</option>
+                <option value="en-US-GuyNeural">Guy (US) - Energetic & Modern Storyteller</option>
+                <option value="en-GB-RyanNeural">Ryan (UK) - British Classic Narrator</option>
+                <option value="en-US-JennyNeural">Jenny (US) - Clear & Engaging Presenter</option>
+                <option value="en-GB-SoniaNeural">Sonia (UK) - Sophisticated Documentary</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="auto-duration">Target Pacing & Length</label>
+              <select id="auto-duration" name="auto_duration">
+                <option value="0.5">30 Seconds (Shorts / Reels Micro-Hook)</option>
+                <option value="1.0" selected>1 Minute (Standard Viral Narrative)</option>
+                <option value="2.0">2 Minutes (Extended Deep Dive)</option>
+                <option value="3.0">3 Minutes (Comprehensive Overview)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field" style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="auto-script" style="margin: 0;">Script Content</label>
+              <button type="button" id="btn-generate-script" style="background: rgba(0, 242, 254, 0.15); border: 1px solid rgba(0, 242, 254, 0.35); color: var(--accent-cyan); font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; cursor: pointer;">
+                ✍️ Preview AI Script
+              </button>
+            </div>
+            <textarea id="auto-script" name="auto_script" rows="3" placeholder="Leave empty to auto-generate during render, or click 'Preview AI Script' to edit before rendering..."></textarea>
+          </div>
+
+          <div class="form-field" style="margin-top: 14px;">
+            <label>Visual Presentation Mode</label>
+            <div class="pill-group">
+              <div class="pill-option">
+                <input type="radio" id="autovis-auto" name="auto_visual_mode" value="auto" checked>
+                <label class="pill-label" for="autovis-auto">
+                  <span>🎨 Auto Thematic Slides</span>
+                  <small>Zero uploads needed</small>
+                </label>
+              </div>
+              <div class="pill-option">
+                <input type="radio" id="autovis-custom" name="auto_visual_mode" value="custom">
+                <label class="pill-label" for="autovis-custom">
+                  <span>🖼️ Use My Own Images</span>
+                  <small>Select local folder</small>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="auto-custom-images-container" class="form-field" style="margin-top: 10px; display: none;">
+            <div class="upload-card">
+              <input id="auto-image-folder" type="file" accept="image/*" webkitdirectory multiple>
+              <div class="upload-label">
+                <span class="upload-icon">🖼️</span>
+                <span>Select Folder of Images (Optional)</span>
+              </div>
+              <span id="auto-image-summary" class="upload-status">Cycles images across generated cues</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 1. Media Assets Card (Active in Manual Mode) -->
+        <section id="manual-pipeline-card" class="studio-card" style="display: none;">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">📁</span>
+              <div>
+                <h2 class="card-title">1. Media Assets & Custom Timing</h2>
+                <p class="card-desc">Select image sequence, SRT timings, and canvas aspect ratio</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aspect Ratio Pill Picker -->
+          <div class="form-field" style="margin-bottom: 16px;">
+            <label>Aspect Ratio Canvas</label>
+            <div class="pill-group">
+              <div class="pill-option">
+                <input type="radio" id="ratio-16-9" name="aspect_ratio" value="16:9" checked>
+                <label class="pill-label" for="ratio-16-9">
+                  <span>16:9</span>
+                  <small>YouTube / Desktop</small>
+                </label>
+              </div>
+              <div class="pill-option">
+                <input type="radio" id="ratio-9-16" name="aspect_ratio" value="9:16">
+                <label class="pill-label" for="ratio-9-16">
+                  <span>9:16</span>
+                  <small>Shorts / Reels / TikTok</small>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Dropzones Grid -->
+          <div class="form-row">
+            <div class="form-field">
+              <label for="pro-image-folder">Image Sequence Folder *</label>
+              <div class="upload-card">
+                <input id="pro-image-folder" name="images" type="file" accept="image/*" webkitdirectory multiple required>
+                <div class="upload-label">
+                  <span class="upload-icon">🖼️</span>
+                  <span>Choose Folder</span>
+                </div>
+                <span id="pro-image-summary" class="upload-status">Select folder with numeric images</span>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="pro-srt-file">SRT Subtitle File *</label>
+              <div class="upload-card">
+                <input id="pro-srt-file" name="srt_file" type="file" accept=".srt,text/srt" required>
+                <div class="upload-label">
+                  <span class="upload-icon">⏱️</span>
+                  <span>Select .SRT</span>
+                </div>
+                <span id="pro-srt-summary" class="upload-status">Controls slide timing & captions</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="pro-audio-file">
+              <span>Background Audio / Narration Track</span>
+              <span class="label-hint">(Optional • MP3, WAV, AAC, M4A)</span>
+            </label>
+            <div class="upload-card">
+              <input id="pro-audio-file" name="audio_file" type="file" accept="audio/*">
+              <div class="upload-label">
+                <span class="upload-icon">🎵</span>
+                <span>Select Audio Track</span>
+              </div>
+              <span id="pro-audio-summary" class="upload-status">Audio loops to video duration or trims cleanly</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Cinema Camera & Ken Burns Motions -->
+        <section class="studio-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">🎬</span>
+              <div>
+                <h2 class="card-title">2. Cinema Camera & Framing</h2>
+                <p class="card-desc">Dynamic multi-directional camera motion and aspect ratio fill</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="motion-style">Camera Motion Pattern</label>
+              <select id="motion-style" name="motion_style">
+                <option value="smart_random" selected>✨ Smart Dynamic (Auto-Varying Ken Burns)</option>
+                <option value="zoom_in">🔍 Cinematic Push-In (Zoom In)</option>
+                <option value="zoom_out">🔭 Dramatic Pull-Out (Zoom Out)</option>
+                <option value="pan_left">⬅️ Horizontal Drift (Pan Left)</option>
+                <option value="pan_right">➡️ Horizontal Drift (Pan Right)</option>
+                <option value="static">⏸️ Static (No Camera Motion)</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="zoom-intensity">Motion Intensity</label>
+              <select id="zoom-intensity" name="zoom_intensity">
+                <option value="subtle" selected>Subtle (105% Scale - Documentary)</option>
+                <option value="medium">Medium (112% Scale - Engaging)</option>
+                <option value="dramatic">Dramatic (122% Scale - High Energy)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field" style="margin-top: 8px;">
+            <label for="bg-mode">
+              <span>Framing & Mismatch Fill Mode</span>
+              <span class="label-hint">For photos that don't match 16:9 / 9:16</span>
+            </label>
+            <select id="bg-mode" name="bg_mode">
+              <option value="glass_blur" selected>💎 Pro Glassmorphic Blur Padding (No Heads/Edges Cropped)</option>
+              <option value="crop_fill">✂️ Direct Center Crop (Full bleed filling canvas)</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- 3. Dynamic Subtitles & Captions Burner -->
+        <section class="studio-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">💬</span>
+              <div>
+                <h2 class="card-title">3. Subtitles & Typography Burner</h2>
+                <p class="card-desc">Burn high-impact styled subtitles from your SRT directly onto video</p>
+              </div>
+            </div>
+          </div>
+
+          <label class="toggle-row" for="enable-subtitles">
+            <div class="toggle-info">
+              <span class="toggle-title">
+                <span>Burn Subtitles into Video</span>
+                <span class="toggle-badge">HIGH ENGAGEMENT</span>
+              </span>
+              <span class="toggle-desc">Renders subtitle text on screen synchronized to each cue</span>
+            </div>
+            <div class="switch">
+              <input type="checkbox" id="enable-subtitles" name="enable_subtitles" checked>
+              <span class="slider"></span>
+            </div>
+          </label>
+
+          <div id="subtitle-options-panel" class="sub-panel">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="subtitle-style">Subtitle Visual Style</label>
+                <select id="subtitle-style" name="subtitle_style">
+                  <option value="hormozi_yellow" selected>⚡ Viral Yellow (Black Outline + Bold Shadow)</option>
+                  <option value="cinematic_white">🎬 Cinematic Clean (White Bold + Soft Shadow)</option>
+                  <option value="neon_glow">💎 Neon Cyan Glow (Cyber / Tech Style)</option>
+                  <option value="dark_box">📦 Modern Dark Box (Translucent Backdrop)</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="subtitle-position">On-Screen Position</label>
+                <select id="subtitle-position" name="subtitle_position">
+                  <option value="bottom" selected>Bottom Third (Standard Video)</option>
+                  <option value="center">Center Screen (Shorts / TikTok Style)</option>
+                  <option value="top">Top Header</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="subtitle-font-size">Subtitle Typography Size</label>
+              <select id="subtitle-font-size" name="subtitle_font_size">
+                <option value="36">Standard (36px - Clean)</option>
+                <option value="46" selected>Large (46px - Recommended)</option>
+                <option value="56">Viral Impact (56px - Extra Bold)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Performance & Hardware Acceleration -->
+        <section class="studio-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">⚡</span>
+              <div>
+                <h2 class="card-title">4. Engine Speed & Acceleration</h2>
+                <p class="card-desc">Multi-core parallel rendering and hardware GPU encoding</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="gpu-accel">Hardware Video Encoder</label>
+              <select id="gpu-accel" name="gpu_accel">
+                <option value="auto" selected>🚀 Auto-Detect GPU (NVIDIA NVENC / AMD / Intel)</option>
+                <option value="nvenc">🟢 Force NVIDIA NVENC (Ultra Fast RTX/GTX)</option>
+                <option value="cpu">💻 CPU Software Encoder (libx264 Maximum Compatibility)</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="parallel-workers">Parallel Segment Concurrency</label>
+              <select id="parallel-workers" name="parallel_workers">
+                <option value="4" selected>⚡ 4 Workers (Up to 4x Faster Export)</option>
+                <option value="2">2 Workers (Balanced)</option>
+                <option value="1">1 Worker (Sequential / Low RAM)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Sound Effects & AI Dialogue Intelligence -->
+        <section class="studio-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">🤖</span>
+              <div>
+                <h2 class="card-title">5. AI Dialogue Sound Effects & Popups</h2>
+                <p class="card-desc">Automatically trigger sound effects and PNG stickers matching dialogue</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="ai-provider">AI Intelligence Provider</label>
+              <select id="ai-provider" name="ai_provider">
+                <option value="openai">OpenAI (ChatGPT / GPT-3.5)</option>
+                <option value="gemini" selected>Google Gemini (Gemini 1.5 Flash)</option>
+                <option value="nvidia">NVIDIA NIM (Llama 3)</option>
+                <option value="bytez">Bytez API</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="api-key">API Key</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="password" id="api-key" name="api_key" placeholder="Enter API Key" style="flex: 1;">
+                <button type="button" id="btn-clear-cache" style="background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); color: #fda4af; padding: 0 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">Clear Cache</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="bytez-box" style="display: none; margin-bottom: 12px;">
+            <div class="form-field">
+              <label for="api-model">Bytez Model ID</label>
+              <input type="text" id="api-model" name="api_model" value="google/gemma-2-9b-it">
+            </div>
+          </div>
+
+          <!-- Slide Transition Click SFX -->
+          <div class="form-field" style="margin-top: 10px;">
+            <label>Image Transition Sounds</label>
+            <div id="pro-bundled-sfx" style="display: flex; flex-direction: column; gap: 6px; margin: 4px 0 8px;">
+              <!-- dynamically injected -->
+            </div>
+          </div>
+
+          <!-- Emotion & Dialogue SFX Volume Slider -->
+          <div class="form-field" style="margin-top: 10px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 8px; padding: 10px 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="emotion-sfx-volume" style="margin: 0; font-size: 0.8rem; font-weight: 600; color: #e2e8f0;">🎭 Emotion & Dialogue SFX Volume</label>
+              <span id="emotion-sfx-vol-label" style="font-size: 0.75rem; color: #38bdf8; font-weight: 700; background: rgba(56, 189, 248, 0.12); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.25);">15% (Quiet & Subtle)</span>
+            </div>
+            <input type="range" id="emotion-sfx-volume" name="emotion_sfx_volume" min="0" max="1" step="0.01" value="0.15" style="width: 100%; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #94a3b8; margin-top: 3px;">
+              <span>Muted (0%)</span>
+              <span>Subtle (15%)</span>
+              <span>Balanced (30%)</span>
+              <span>Loud (60%+)</span>
+            </div>
+          </div>
+
+          <!-- AI Popups Toggle -->
+          <label class="toggle-row" for="enable-popups" style="margin-top: 12px;">
+            <div class="toggle-info">
+              <span class="toggle-title">
+                <span>Dialogue-Animated Characters (PNG Puppets)</span>
+                <span class="toggle-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border-color: rgba(245, 158, 11, 0.45);">@ANIMATEDHISTORY STYLE</span>
+              </span>
+              <span class="toggle-desc">AI analyzes dialogue lines & matches character action PNGs (Attacking, Speaking, Shock, King, Defeat, March) with dynamic motion curves!</span>
+            </div>
+            <div class="switch">
+              <input type="checkbox" id="enable-popups" name="enable_popups" checked>
+              <span class="slider"></span>
+            </div>
+          </label>
+
+          <div id="popup-options-panel" class="sub-panel" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Active Stickman & Character Asset Suite -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 0.82rem; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+                  <span>🎬</span> Animated Explainer Character Suite (Tech, Mind, Science & History)
+                </span>
+                <span id="channel-asset-count" style="font-size: 0.7rem; color: #cbd5e1; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 4px;">Loading assets...</span>
+              </div>
+              
+              <!-- Character badges showcase -->
+              <div id="channel-assets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; max-height: 165px; overflow-y: auto; padding: 4px 0;">
+                <!-- Dynamically injected thumbnails -->
+              </div>
+
+              <!-- Upload Custom Channel Assets Dropzone -->
+              <div style="margin-top: 10px; border-top: 1px dashed rgba(245, 158, 11, 0.2); padding-top: 10px;">
+                <label for="custom-asset-upload" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(30, 41, 59, 0.5); padding: 8px 12px; border-radius: 6px; border: 1px dashed rgba(245, 158, 11, 0.4); transition: border-color 0.2s;">
+                  <span style="font-size: 0.76rem; color: #cbd5e1; display: flex; align-items: center; gap: 6px;">
+                    <span>📥</span> <strong>Add Character Action PNGs</strong> (.png)
+                  </span>
+                  <span style="font-size: 0.7rem; color: #fbbf24; text-decoration: underline;">Upload PNG</span>
+                  <input type="file" id="custom-asset-upload" accept="image/png,image/webp,image/jpeg" multiple style="display: none;">
+                </label>
+                <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 4px; line-height: 1.3;">
+                  💡 Or drop action PNGs directly into root folders: <code>characters/</code> or <code>custom_channel_assets/</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Authentic SFX Suite Status -->
+            <div style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 8px; padding: 10px;">
+              <span style="font-size: 0.76rem; font-weight: 600; color: #e2e8f0; display: block; margin-bottom: 6px;">
+                🔊 Synchronized Historical Audio Effects:
+              </span>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <span style="font-size: 0.7rem; background: rgba(56, 189, 248, 0.12); color: #38bdf8; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.25);">⚔️ Sword Clash</span>
+                <span style="font-size: 0.7rem; background: rgba(239, 68, 68, 0.12); color: #f87171; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.25);">💣 Cannon Boom</span>
+                <span style="font-size: 0.7rem; background: rgba(234, 179, 8, 0.12); color: #facc15; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(234, 179, 8, 0.25);">🎺 Royal Fanfare</span>
+                <span style="font-size: 0.7rem; background: rgba(168, 85, 247, 0.12); color: #c084fc; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(168, 85, 247, 0.25);">📯 War Horn</span>
+                <span style="font-size: 0.7rem; background: rgba(34, 197, 94, 0.12); color: #4ade80; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(34, 197, 94, 0.25);">🥁 Taiko War Drum</span>
+                <span style="font-size: 0.7rem; background: rgba(249, 115, 22, 0.12); color: #fb923c; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(249, 115, 22, 0.25);">🏹 Arrow Fly & Hit</span>
+                <span style="font-size: 0.7rem; background: rgba(148, 163, 184, 0.12); color: #cbd5e1; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(148, 163, 184, 0.25);">💥 Dramatic Impact</span>
+                <span style="font-size: 0.7rem; background: rgba(236, 72, 153, 0.12); color: #f472b6; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(236, 72, 153, 0.25);">🐎 Cavalry Gallop</span>
+                <span style="font-size: 0.7rem; background: rgba(20, 184, 166, 0.12); color: #2dd4bf; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(20, 184, 166, 0.25);">🏆 Victory Cheer</span>
+              </div>
+            </div>
+
+            <!-- Popup & Puppet Sound Effects Volume Slider -->
+            <div class="form-field" style="margin-top: 4px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 8px; padding: 10px 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label for="popup-sfx-volume" style="margin: 0; font-size: 0.8rem; font-weight: 600; color: #e2e8f0;">🔊 Popup & Puppet Sound Volume</label>
+                <span id="popup-sfx-vol-label" style="font-size: 0.75rem; color: #fbbf24; font-weight: 700; background: rgba(245, 158, 11, 0.12); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.25);">40% (Standard)</span>
+              </div>
+              <input type="range" id="popup-sfx-volume" name="popup_sfx_volume" min="0" max="1" step="0.01" value="0.40" style="width: 100%; cursor: pointer;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: #94a3b8; margin-top: 3px;">
+                <span>Muted (0%)</span>
+                <span>Subtle (20%)</span>
+                <span>Standard (40%)</span>
+                <span>Loud (70%+)</span>
+              </div>
+            </div>
+
+            <div class="form-field" style="margin: 0;">
+              <label for="popup-prompt">Custom AI Popup Instructions (Optional)</label>
+              <textarea id="popup-prompt" name="popup_prompt" rows="2" placeholder="Leave empty for auto heuristic matching, or specify: e.g. Trigger 'swords' on battles; trigger 'king' on rulers."></textarea>
+            </div>
+          </div>
+        </section>
+
+      </form>
+
+      <!-- Right Column: Live Production Monitor & Action Deck -->
+      <aside class="studio-monitor">
+        
+        <div class="monitor-frame">
+          <div class="monitor-header">
+            <div class="live-indicator">
+              <span class="live-dot" id="monitor-dot"></span>
+              <span id="monitor-status-text">STUDIO MONITOR READY</span>
+            </div>
+            <span id="monitor-resolution" style="color: var(--accent-cyan);">1080P FULL HD</span>
+          </div>
+
+          <!-- Video Canvas / Placeholder -->
+          <div class="preview-container" id="monitor-container">
+            <video id="pro-video-preview" controls playsinline hidden></video>
+            <div class="empty-preview-screen" id="monitor-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <path d="M8 21h8m-4-4v4"/>
+                <polygon points="10 8 16 11 10 14 10 8" fill="currentColor"/>
+              </svg>
+              <div>
+                <p style="font-weight: 600; color: #cbd5e1; font-size: 0.95rem;">No Render Active</p>
+                <p style="font-size: 0.78rem; margin-top: 4px;">Configured video preview will stream here upon completion</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metrics Strip -->
+          <div class="metrics-strip">
+            <div class="metric-item">
+              <span class="metric-label">Detected Images</span>
+              <span class="metric-value" id="stat-images">0</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">SRT Cues</span>
+              <span class="metric-value" id="stat-cues">0</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Est. Duration</span>
+              <span class="metric-value" id="stat-duration">0:00</span>
+            </div>
+          </div>
+
+          <!-- Production HUD Progress Panel -->
+          <div class="render-hud" id="hud-panel" style="display: none;">
+            <div class="hud-top">
+              <span class="hud-phase" id="hud-phase">Initializing...</span>
+              <span class="hud-percent" id="hud-percent">0%</span>
+            </div>
+            <div class="hud-track">
+              <div class="hud-bar" id="hud-bar"></div>
+            </div>
+            <span class="hud-detail" id="hud-detail">Preparing export assets...</span>
+          </div>
+
+          <!-- Action Deck Buttons -->
+          <div class="deck-actions">
+            <div id="status-message" class="status-banner" style="display: none;"></div>
+            
+            <button type="button" id="btn-render-master" class="btn-render">
+              <span>🚀</span>
+              <span>Render Pro Video</span>
+            </button>
+
+            <button type="button" id="btn-cancel-render" class="btn-abort" style="display: none;">
+              <span>⏹️ Abort Generation</span>
+            </button>
+
+            <button type="button" id="btn-download-master" class="btn-download" style="display: none;">
+              <span>⬇️ Download Master MP4</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Tech Specs Card -->
+        <div class="studio-card" style="padding: 16px; margin: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--text-dim); font-family: 'DM Mono', monospace;">
+            <span>PIPELINE: PRO ENGINE V1.2</span>
+            <span>COLOR: YUV420P</span>
+            <span>FPS: 30</span>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+
+  <!-- User Manual Modal -->
+  <div id="manual-modal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.78); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #0f172a; border: 1px solid rgba(14, 165, 233, 0.4); border-radius: 14px; max-width: 820px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); overflow: hidden;">
+      
+      <!-- Modal Header -->
+      <div style="padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; background: rgba(30, 41, 59, 0.5);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">📖</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.05rem; color: #f8fafc; font-weight: 700;">Studio Pro — User Manual & Guide</h3>
+            <p style="margin: 0; font-size: 0.75rem; color: #94a3b8;">How to generate animated videos across Tech, Mind, Science & History</p>
+          </div>
+        </div>
+        <button type="button" id="btn-close-manual" style="background: rgba(255, 255, 255, 0.1); border: none; color: #cbd5e1; font-size: 1.2rem; cursor: pointer; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div style="padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
+        
+        <!-- Section 1: Quick Start -->
+        <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(14, 165, 233, 0.25); border-radius: 8px; padding: 14px;">
+          <h4 style="margin: 0 0 8px 0; color: #38bdf8; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <span>⚡</span> 1. Quick Start: 1-Click Auto Pipeline
+          </h4>
+          <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
+            <li>Type any topic in the <strong>Topic or Video Title</strong> box (e.g. <em>Why You Overthink</em>, <em>How Elon Musk Got That Much Money</em>, or <em>What Did Ancient Humans Do</em>).</li>
+            <li>Select your preferred Neural TTS Voice (Christopher, Guy, Ryan, Jenny, Sonia).</li>
+            <li>Click <strong>🚀 Launch Studio Render</strong>. The engine researches the topic, records the voiceover, generates timed subtitles, maps characters, and outputs a finished MP4!</li>
+          </ol>
+        </div>
+
+        <!-- Section 2: Character Action Puppets -->
+        <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 14px;">
+          <h4 style="margin: 0 0 8px 0; color: #fbbf24; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <span>🎭</span> 2. Character Action PNG Puppets
+          </h4>
+          <p style="margin: 0 0 8px 0;">Drop your transparent character action PNGs into <code>characters/</code> or click <strong>Upload PNG</strong> in the left sidebar. The AI reads each dialogue cue and matches the right character automatically!</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; font-size: 0.78rem;">
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <strong style="color: #67e8f9;">🧠 Thinking / Mind:</strong><br>
+              <code>person_thinking.png</code>, <code>brain.png</code><br>
+              <em style="color: #94a3b8;">Executes contemplative hovering float.</em>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <strong style="color: #f87171;">😰 Stress & Panic:</strong><br>
+              <code>stress.png</code>, <code>anxious.png</code><br>
+              <em style="color: #94a3b8;">Executes nervous micro-shivers and pulse.</em>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <strong style="color: #fbbf24;">💡 Eureka / Idea:</strong><br>
+              <code>idea.png</code>, <code>lightbulb.png</code><br>
+              <em style="color: #94a3b8;">Executes sudden spring jump upward.</em>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <strong style="color: #34d399;">💰 Wealth & Business:</strong><br>
+              <code>elon_rich.png</code>, <code>money.png</code><br>
+              <em style="color: #94a3b8;">Executes joyful float and coin-toss cadence.</em>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <strong style="color: #a78bfa;">🚀 Rockets & Tech:</strong><br>
+              <code>elon_rocket.png</code>, <code>tesla.png</code><br>
+              <em style="color: #94a3b8;">Executes upward flight acceleration.</em>
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+              <strong style="color: #f97316;">🔥 Prehistory & Caveman:</strong><br>
+              <code>caveman_fire.png</code>, <code>hunter.png</code><br>
+              <em style="color: #94a3b8;">Triggers on ancient human survival lines.</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Audio & SFX -->
+        <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 14px;">
+          <h4 style="margin: 0 0 8px 0; color: #34d399; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <span>🔊</span> 3. Dialogue-Driven Sound Effects & Volume
+          </h4>
+          <p style="margin: 0 0 6px 0;">Use the <strong>Emotion & Action SFX Volume</strong> slider in the left sidebar to fine-tune sound effect loudness (default: <code>15%</code>). The AI synchronizes whooshes, cash registers, tension hits, dings, and clock ticks to spoken words!</p>
+        </div>
+
+        <!-- Section 4: Output & Location -->
+        <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 8px; padding: 14px;">
+          <h4 style="margin: 0 0 8px 0; color: #c084fc; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+            <span>📁</span> 4. Video Files & Manual Mode
+          </h4>
+          <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px;">
+            <li>All finished videos are automatically saved in the <code>output/</code> directory.</li>
+            <li>For manual videos with your own images, toggle <strong>📁 Manual Assets Mode</strong> at the top, select your image folder, and upload your <code>.srt</code> subtitle file!</li>
+            <li>For complete detailed documentation, open <code>USER_MANUAL.md</code> in your project root.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="padding: 12px 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: flex-end; background: rgba(30, 41, 59, 0.5);">
+        <button type="button" id="btn-close-manual-footer" style="background: var(--accent-gradient); border: none; color: #000; font-weight: 700; padding: 8px 18px; border-radius: 6px; cursor: pointer;">Got It!</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/studio.js"></script>
+</body>
+</html>
