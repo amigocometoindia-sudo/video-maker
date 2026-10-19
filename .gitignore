@@ -22,3 +22,7 @@ ai_cache/
 # Large / temporary media at project root
 /*.mp4
 temp.wav
+
+# Gemini export folder
+gemini_project_export/
+
