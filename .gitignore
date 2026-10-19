@@ -23,6 +23,8 @@ ai_cache/
 /*.mp4
 temp.wav
 
-# Gemini export folder
+# Gemini export folder and zip
 gemini_project_export/
+gemini_project_export.zip
+
 
